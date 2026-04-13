@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/12/01
+* Version            : V1.0.1
+* Date               : 2026/04/03
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -15,14 +15,17 @@
  * and you can choose the command method or the IO method to jump to the APP .
  * Key  parameters: CalAddr - address in flash (same in APP), note that this address needs to be unused.
  *                  CheckNum - The value of 'CalAddr' that needs to be modified.
- * Tips :the routine need IAP software version 1.50.
- *       For this chip has 2 USBHS £¬you can choose anyone you what by changing the definition "USBHS_CONTROLLER".
+ * Tips :the routine need IAP software version 1.60.
+ *       For this chip has 2 USBHS, you can choose anyone you what by changing the definition "USBHS_CONTROLLER".
+ *       DEF_USB_IAP_MODE - USB Vendor or USB HID mode.
  */
 
 #include "debug.h"
 #include "ch32v4x7_usbhs_device.h"
 #include "ch32v4x7_gpio.h"
 #include "iap.h"
+#include "usb_inf.h"
+
 
 #define UPGRADE_MODE_COMMAND   0
 #define UPGRADE_MODE_IO        1
@@ -91,14 +94,13 @@ int main(void)
 
     USART2_CFG(460800);
     /* USB20 device init */
-    USBHS_Device_Init( ENABLE );
-    NVIC_EnableIRQ( USBHS_IRQn );
-    USART2_IT_CFG();
+    USB_Init(ENABLE);
+	USART2_IT_CFG();
 
 	while(1)
 	{
 #if 0
-        if( USART_GetFlagStatus(USART3, USART_FLAG_RXNE) != RESET)
+        if( USART_GetFlagStatus(USART2, USART_FLAG_RXNE) != RESET)
         {
             UART_Rx_Deal();
         }

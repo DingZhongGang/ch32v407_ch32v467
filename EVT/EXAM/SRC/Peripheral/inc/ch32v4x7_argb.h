@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT  *******************************
 * File Name          : ch32v4x7_argb.h
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2026/02/10
+* Version            : V1.0.1
+* Date               : 2026/04/08
 * Description        : This file contains all the functions prototypes for the 
 *                      ARGB firmware library.
 *********************************************************************************
@@ -44,16 +44,31 @@ typedef enum
     ARGB_IT_TXE = 0x00002000
 } ARGB_IT_Typedef;
 
+/* ARGB status enumeration */
+typedef enum
+{
+    ARGB_Idle = 0,
+    ARGB_SendingData,
+    ARGB_SendingRST
+} ARGB_STATypeDef;
+
 /* ARGB initialization structure definition */
 typedef struct
 {
-    uint16_t ARGB_Length;
-    uint16_t ARGB_T1H;
-    uint16_t ARGB_T0H;
-    uint16_t ARGB_DataPeriod;
-    uint16_t ARGB_RSTPeriod;
-    ARGB_Mode_Typedef ARGB_Mode;
-    ARGB_Endian_Typedef ARGB_Endian;
+    uint16_t ARGB_Length;                       /* Frame data length count in bytes
+                                                    This parameter must be a number between 0 and 0xFFFF */
+    uint16_t ARGB_T1H;                          /* The high-level duration of Logic 1, the time is based on the system clock.
+                                                    This parameter must be a number between 0 and 0xFFF */
+    uint16_t ARGB_T0H;                          /* The high-level duration of Logic 0, the time is based on the system clock.
+                                                    This parameter must be a number between 0 and 0xFFF */
+    uint16_t ARGB_DataPeriod;                   /* Data period
+                                                    This parameter must be a number between 0 and 0xFFF */
+    uint32_t ARGB_RSTPeriod;                    /* Reset period
+                                                    This parameter must be a number between 0 and 0x1FFFF */
+    ARGB_Mode_Typedef ARGB_Mode;                /* ARGB mode: send RST first or send data first
+                                                    This parameter must be one of the @ref ARGB_Mode_Typedef enumeration */
+    ARGB_Endian_Typedef ARGB_Endian;            /* Data endianness
+                                                    This parameter must be one of the @ref ARGB_Endian_Typedef enumeration */
 } ARGB_InitTypeDef;
 
 void ARGB_DeInit(void);
@@ -66,9 +81,11 @@ void ARGB_ClearFlag(ARGB_IT_Typedef ARGB_IT);
 FlagStatus ARGB_GetFlagStatus(ARGB_IT_Typedef ARGB_IT);
 void ARGB_ClearITPendingBit(ARGB_IT_Typedef ARGB_IT);
 FlagStatus ARGB_GetITStatus(ARGB_IT_Typedef ARGB_IT);
-uint32_t ARGB_GetCurrBaseCNT();
-uint32_t ARGB_GetBitCNT();
-uint32_t ARGB_GetByteCNT();
+uint32_t ARGB_GetCurrBaseCNT(void);
+uint32_t ARGB_GetBitCNT(void);
+uint32_t ARGB_GetByteCNT(void);
+void ARGB_SendData(uint8_t Data);
+ARGB_STATypeDef ARGB_GetCurrState(void);
 
 #ifdef __cplusplus
 }

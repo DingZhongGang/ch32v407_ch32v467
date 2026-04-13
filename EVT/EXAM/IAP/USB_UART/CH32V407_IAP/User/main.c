@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/12/01
+* Version            : V1.0.1
+* Date               : 2026/04/03
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -15,14 +15,17 @@
  * and you can choose the command method or the IO method to jump to the APP .
  * Key  parameters: CalAddr - address in flash (same in APP), note that this address needs to be unused.
  *                  CheckNum - The value of 'CalAddr' that needs to be modified.
- * Tips :the routine need IAP software version 1.50.
- *       For this chip has 2 USBHS £¬you can choose anyone you what by changing the definition "USBHS_CONTROLLER".
- */
+ * Tips :the routine need IAP software version 1.60.
+ *       For this chip has 2 USBHS, you can choose anyone you what by changing the definition "USBHS_CONTROLLER".
+ *       DEF_USB_IAP_MODE - USB Vendor or USB HID mode.
+ */      
 
 #include "debug.h"
 #include "ch32v4x7_usbhs_device.h"
 #include "ch32v4x7_gpio.h"
 #include "iap.h"
+#include "usb_inf.h"
+
 extern vu8 End_Flag;
 
 #define UPGRADE_MODE_COMMAND   0
@@ -38,17 +41,16 @@ extern vu8 End_Flag;
  */
 void IAP_2_APP(void)
 { 
-    USBHS_Device_Init( DISABLE );
-    NVIC_DisableIRQ( USBHS_IRQn );
+    USB_Init(DISABLE);
     Delay_Ms(50);
     printf("jump APP\r\n");
+    Delay_Ms(50);
     GPIO_DeInit(GPIOA);
     GPIO_DeInit( GPIOB);
     USART_DeInit(USART3);
     RCC_PB2PeriphClockCmd(RCC_PB2Periph_GPIOA, DISABLE);
     RCC_PB2PeriphClockCmd( RCC_PB2Periph_GPIOB,DISABLE);
     RCC_PB1PeriphClockCmd(RCC_PB1Periph_USART2,DISABLE);
-    RCC_HBPeriphClockCmd(RCC_HBPeriph_USBHS, DISABLE);
 
     Delay_Ms(10);
     NVIC_EnableIRQ(Software_IRQn);
@@ -89,8 +91,7 @@ int main(void)
 
     USART2_CFG(460800);
     /* USB20 device init */
-    USBHS_Device_Init( ENABLE );
-    NVIC_EnableIRQ( USBHS_IRQn );
+    USB_Init(ENABLE);
 
 	while(1)
 	{

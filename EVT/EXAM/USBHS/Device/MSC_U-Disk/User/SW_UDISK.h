@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : SW_UDISK.h
  * Author             : WCH
- * Version            : V1.0.0
- * Date               : 2026/01/19
+ * Version            : V1.0.1
+ * Date               : 2026/04/10
  * Description        : header file for SW_UDISK.c
 *********************************************************************************
 * Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -99,8 +99,8 @@ typedef union _BULK_ONLY_CMD
     #define DEF_FLASH_SECTOR_SIZE      4096                                                /* Flash sector size */
     #define DEF_UDISK_SECTOR_SIZE      DEF_CFG_DISK_SEC_SIZE                               /* UDisk sector size */
 #elif (STORAGE_MEDIUM == MEDIUM_INTERAL_FLASH)
-    #define DEF_CFG_DISK_SEC_SIZE      512                                                 /* Disk sector size */
-    #define DEF_FLASH_SECTOR_SIZE      512                                                 /* Flash sector size */
+    #define DEF_CFG_DISK_SEC_SIZE      4096                                                /* Disk sector size */
+    #define DEF_FLASH_SECTOR_SIZE      4096                                                /* Flash sector size */
     #define DEF_UDISK_SECTOR_SIZE      DEF_CFG_DISK_SEC_SIZE                               /* UDisk sector size */
 #endif
 

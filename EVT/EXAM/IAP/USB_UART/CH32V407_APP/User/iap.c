@@ -13,7 +13,7 @@
 #include "string.h"
 #include "flash.h"
 #include "core_riscv.h"
-
+#include "usb_inf.h"
 /******************************************************************************/
 
 iapfun jump2app;
@@ -21,11 +21,12 @@ vu32 Program_addr = FLASH_Base;
 vu32 Verify_addr = FLASH_Base;
 vu32 User_APP_Addr_offset = 0x5000;
 vu8 Verify_Star_flag = 0;
-u8 Fast_Program_Buf[1024*10];
+vu8 Fast_Program_Buf[1024*10];
 vu32 CodeLen = 0;
 vu8 End_Flag = 0;
-u8 EP2_Rx_Buffer[USBD_DATA_SIZE+4];
-#define  isp_cmd_t   ((isp_cmd  *)EP2_Rx_Buffer)
+u8 IAP_Deal_Buf[USBD_DATA_SIZE+4];
+#define  isp_cmd_t   ((isp_cmd  *)IAP_Deal_Buf)
+
 
 #define  Size_256B         0x100
 #define  Size_4KB          0x1000
@@ -40,37 +41,20 @@ u8 EP2_Rx_Buffer[USBD_DATA_SIZE+4];
  */
 u8 RecData_Deal(void)
 {
-    uint32_t  s;
-    
-    switch ( isp_cmd_t->other.buf[0]) {
-    case CMD_IAP_ERASE:
-        s = ERR_SUCCESS;
-        break;
-
-    case CMD_IAP_PROM:
-        s = ERR_ERROR;
-        break;
-
-    case CMD_IAP_VERIFY:
-        s = ERR_ERROR;
-        break;
-
-    case CMD_IAP_END:
-        s = ERR_ERROR;
-        break;
-
-    case CMD_JUMP_IAP:
+    uint8_t  s;
+     switch ( isp_cmd_t->other.buf[0]) {
+     case CMD_JUMP_IAP:
         FLASH_Unlock_Fast();
         FLASH_ErasePage(CalAddr & (~(Size_4KB-1)));
         FLASH_ProgramWord(CalAddr, 0x5aa55aa5);
         FLASH->CTLR |= ((uint32_t)0x00008000);
         FLASH->CTLR |= ((uint32_t)0x00000080);
-        s = ERR_SUCCESS;
-        break;
-    default:
-        s = ERR_ERROR;
-        break;
-    }
+         s = ERR_SUCCESS;
+         break;
+     default:
+         s = ERR_ERROR;
+         break;
+     }
 
      return s;
 }
@@ -86,25 +70,8 @@ u8 RecData_Deal(void)
  */
 u8 UART_RecData_Deal(void)
 {
-    uint32_t  s;
-
+    uint8_t  s;
     switch ( isp_cmd_t->UART.Cmd) {
-    case CMD_IAP_ERASE:
-        s = ERR_SUCCESS;
-        break;
-
-    case CMD_IAP_PROM:
-        s = ERR_ERROR;
-        break;
-
-    case CMD_IAP_VERIFY:
-        s = ERR_ERROR;
-        break;
-
-    case CMD_IAP_END:
-        s = ERR_ERROR;
-        break;
-
     case CMD_JUMP_IAP:
         FLASH_Unlock_Fast();
         FLASH_ErasePage(CalAddr & (~(Size_4KB-1)));
@@ -120,7 +87,6 @@ u8 UART_RecData_Deal(void)
 
     return s;
 }
-
 /*********************************************************************
  * @fn      GPIO_Cfg_init
  *

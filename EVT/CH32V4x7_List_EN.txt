@@ -1,5 +1,5 @@
 
-Nanjing Qinheng Microelectronics Co., Ltd. 2026.03
+Nanjing Qinheng Microelectronics Co., Ltd. 2026.04
 
 https://wch-ic.com
 
@@ -36,6 +36,7 @@ Directory
   |      |      |      |      |-- TIM_Trigger:TIM trigger ADC conversion routine 
   |      |      |      |-- APPLICATION
   |      |      |      |      |-- SoftUART: I/O port simulation serial port routine
+  |      |      |      |      |-- LTDC_LVGL: use LTDC driver to display some animations on the LCD
   |      |      |      |-- ARGB
   |      |      |      |      |-- Gradient: ARGB routine
   |      |      |      |-- BKP

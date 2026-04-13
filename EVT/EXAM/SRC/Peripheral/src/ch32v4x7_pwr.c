@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : ch32v4x7_pwr.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/12/01
+* Version            : V1.0.1
+* Date               : 2026/04/10
 * Description        : This file provides all the PWR firmware functions.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -353,58 +353,6 @@ void PWR_EnterSTOPMode_RAM_LV(uint32_t PWR_Regulator, uint8_t PWR_STOPEntry)
     }
 
     NVIC->SCTLR &= ~(1 << 2);
-}
-
-/*********************************************************************
- * @fn      PWR_VDDKLevelConfig
- *
- * @brief   Config the VDDK level.
- *
- * @param   PWR_VDDK_Level - the VDDK level.
- *            PWR_VDDK_Level0 - set VDDK to level 0.
- *            PWR_VDDK_Level1 - set VDDK to level 1.
- *            PWR_VDDK_Level2 - set VDDK to level 2.
- *            PWR_VDDK_Level3 - set VDDK to level 3.
- *            PWR_VDDK_Level4 - set VDDK to level 4.
- *            PWR_VDDK_Level5 - set VDDK to level 5.
- *            PWR_VDDK_Level6 - set VDDK to level 6.
- *            PWR_VDDK_Level7 - set VDDK to level 7.
- *
- * @return  none
- */
-void PWR_VDDKLevelConfig(uint32_t PWR_VDDK_Level)
-{
-    uint32_t tmpreg = 0;
-    tmpreg = PWR->CTLR; 
-    tmpreg &= ~PWR_CTLR_LDOVDDK;
-    tmpreg |= PWR_VDDK_Level;
-    PWR->CTLR = tmpreg;
-}
-
-/*********************************************************************
- * @fn      PWR_VDD12ALevelConfig
- *
- * @brief   Config the VDD12A level.
- *
- * @param   PWR_VDD12A_Level - the VDD12A level.
- *            PWR_VDD12A_Level0 - set VDDK to level 0.
- *            PWR_VDD12A_Level1 - set VDDK to level 1.
- *            PWR_VDD12A_Level2 - set VDDK to level 2.
- *            PWR_VDD12A_Level3 - set VDDK to level 3.
- *            PWR_VDD12A_Level4 - set VDDK to level 4.
- *            PWR_VDD12A_Level5 - set VDDK to level 5.
- *            PWR_VDD12A_Level6 - set VDDK to level 6.
- *            PWR_VDD12A_Level7 - set VDDK to level 7.
- *
- * @return  none
- */
-void PWR_VDD12ALevelConfig(uint32_t PWR_VDD12A_Level)
-{
-    uint32_t tmpreg = 0;
-    tmpreg = PWR->CTLR; 
-    tmpreg &= ~PWR_CTLR_LDOVDD12A;
-    tmpreg |= PWR_VDD12A_Level;
-    PWR->CTLR = tmpreg;
 }
 
 /*********************************************************************

@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT  *******************************
 * File Name          : ch32v4x7_dbgmcu.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/12/01
+* Version            : V1.0.1
+* Date               : 2026/03/10
 * Description        : This file provides all the DBGMCU firmware functions.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -82,12 +82,12 @@ void __set_DEBUG_CR(uint32_t value)
  *            DBGMCU_I2C1_SMBUS_TIMEOUT - Debug I2C1 SMBUS time out when Core is halted
  *            DBGMCU_TIM1_STOP - TIM1 counter stopped when Core is halted
  *            DBGMCU_TIM2_STOP - TIM2 counter stopped when Core is halted
- *            DBGMCU_TIM2_STOP - TIM2 counter stopped when Core is halted
- *            DBGMCU_TIM2_STOP - TIM2 counter stopped when Core is halted
- *            DBGMCU_TIM2_STOP - TIM2 counter stopped when Core is halted
- *            DBGMCU_TIM2_STOP - TIM2 counter stopped when Core is halted
- *            DBGMCU_TIM2_STOP - TIM2 counter stopped when Core is halted
- *            DBGMCU_TIM2_STOP - TIM2 counter stopped when Core is halted
+ *            DBGMCU_TIM3_STOP - TIM3 counter stopped when Core is halted
+ *            DBGMCU_TIM4_STOP - TIM4 counter stopped when Core is halted
+ *            DBGMCU_TIM5_STOP - TIM5 counter stopped when Core is halted
+ *            DBGMCU_TIM6_STOP - TIM6 counter stopped when Core is halted
+ *            DBGMCU_TIM7_STOP - TIM7 counter stopped when Core is halted
+ *            DBGMCU_TIM8_STOP - TIM8 counter stopped when Core is halted
  *            DBGMCU_CAN1_STOP - Debug CAN1 stopped when Core is halted
  *          NewState - ENABLE or DISABLE.
  *

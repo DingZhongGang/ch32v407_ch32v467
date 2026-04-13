@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT  *******************************
 * File Name          : ch32v4x7.h
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/12/01
+* Version            : V1.0.1
+* Date               : 2026/04/02
 * Description        : CH32V4x7 Device Peripheral Access Layer Header File.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -31,7 +31,7 @@
 
 /* CH32V4x7 Standard Peripheral Library version number */
 #define __CH32V4x7_STDPERIPH_VERSION_MAIN   (0x01) /* [15:8] main version */
-#define __CH32V4x7_STDPERIPH_VERSION_SUB    (0x00) /* [7:0] sub version */
+#define __CH32V4x7_STDPERIPH_VERSION_SUB    (0x01) /* [7:0] sub version */
 #define __CH32V4x7_STDPERIPH_VERSION        ( (__CH32V4x7_STDPERIPH_VERSION_MAIN << 8)\
                                              |(__CH32V4x7_STDPERIPH_VERSION_SUB << 0))
 
@@ -1611,53 +1611,6 @@ typedef struct
 #define  ADC_SMP_SEL_15                              ((uint32_t)0x00008000)        /* channel_15 */
 #define  ADC_SMP_SEL_16                              ((uint32_t)0x00010000)        /* channel_16 */
 #define  ADC_SMP_SEL_17                              ((uint32_t)0x00020000)        /* channel_17 */
-
-/******************************************************************************/
-/*                            Addressable RGB                                 */
-/******************************************************************************/
-
-/*******************  Bit definition for ARGB_CTLR register  *******************/
-#define ARGB_TE                                      ((uint32_t)0x00000001)        /* Transmit enable */
-#define ARGB_DMAEN                                   ((uint32_t)0x00000002)        /* DMA enable */
-#define ARGB_MODE                                    ((uint32_t)0x00000004)        /* Transmit mode */
-#define ARGB_LSB                                     ((uint32_t)0x00000008)        /* little-endian mode */
-#define ARGB_FRHIE                                   ((uint32_t)0x00000100)        /* Data refresh interrupt enable */
-#define ARGB_RSTIE                                   ((uint32_t)0x00000200)        /* Reset sent interrupt enable */
-#define ARGB_TCIE                                    ((uint32_t)0x00000400)        /* Transmit complete interrupt enable */
-#define ARGB_BYTEIE                                  ((uint32_t)0x00000800)        /* Byte transmit complete interrupt enable */
-#define ARGB_HALFIE                                  ((uint32_t)0x00001000)        /* Half Transfer interrupt enable */
-#define ARGB_TXEIE                                   ((uint32_t)0x00002000)        /* Transfer buffer empty interrupt enable */
-
-/*******************  Bit definition for ARGB_DAT_ARR register  ******************/
-#define ARGB_DAT_ARR                                 ((uint32_t)0x000003FF)        /* 0/1 code circle */
-
-/*******************  Bit definition for ARGB_RST_ARR register  ******************/
-#define ARGB_RST_ARR                                 ((uint32_t)0x0001FFFF)        /* Reset code circle */
-
-/*******************  Bit definition for ARGB_CCRL register  *********************/
-#define ARGB_CCRL                                    ((uint32_t)0x000003FF)        /* 0 code T0H */
-
-/*******************  Bit definition for ARGB_CCRH register  *********************/
-#define ARGB_CCRH                                    ((uint32_t)0x000003FF)        /* 0 code T1H */
-
-/*******************  Bit definition for ARGB_DAT_CYC register  ******************/
-#define ARGB_DAT_CYC                                 ((uint32_t)0x0000001F)        /* Data refresh cycle length */
-
-/*******************  Bit definition for ARGB_DATAR register  ********************/
-#define ARGB_DATAR                                   ((uint32_t)0x000000FF)        /* Send data */
-
-/*******************  Bit definition for ARGB_STATR register  ********************/
-#define ARGB_FRHIF                                   ((uint32_t)0x00000001)        /* Interrupt flag after sending data refresh cycle completed */
-#define ARGB_RSTIF                                   ((uint32_t)0x00000002)        /* RESET code sending completed interrupt flag */
-#define ARGB_TCIF                                    ((uint32_t)0x00000004)        /* Send completion interrupt flag */
-#define ARGB_BYTEIF                                  ((uint32_t)0x00000008)        /* Byte send complete interrupt flag */
-#define ARGB_HALFIF                                  ((uint32_t)0x00000010)        /* Send over half interrupt flag */
-#define ARGB_TXEIF                                   ((uint32_t)0x00000020)        /* Send buffer empty flag */
-#define ARGB_BIT_CNT                                 ((uint32_t)0x00000700)        /* Send bit counter */
-#define ARGB_BYTE_CNT                                ((uint32_t)0x0000F800)        /* Send byte counter */
-
-/*******************  Bit definition for ARGB_CNTR register  ********************/
-#define ARGB_CNTR                                    ((uint32_t)0x0001FFFF)        /* ARGB basic counter */
 
 /******************************************************************************/
 /*                            Backup registers                                */
@@ -6093,19 +6046,19 @@ typedef struct
 #define  ARGB_TXEIE                                  ((uint32_t)0x00002000)
 
 /*******************  Bit definition for ARGB_DAT_ARR register  *******************/
-#define  ARGB_DAT_ARR                                ((uint32_t)0x000003FF)
+#define  ARGB_DAT_ARR                                ((uint32_t)0x00000FFF)
 
 /*******************  Bit definition for ARGB_RST_ARR register  *******************/
 #define  ARGB_RST_ARR                                ((uint32_t)0x0001FFFF)
 
 /*******************  Bit definition for ARGB_CCRL register  *******************/
-#define  ARGB_CCRL                                   ((uint32_t)0x000003FF)
+#define  ARGB_CCRL                                   ((uint32_t)0x00000FFF)
 
 /*******************  Bit definition for ARGB_CCRH register  *******************/
-#define  ARGB_CCRH                                   ((uint32_t)0x000003FF)
+#define  ARGB_CCRH                                   ((uint32_t)0x00000FFF)
 
 /*****************  Bit definition for ARGB_DAT_CYC register  ******************/
-#define  ARGB_DAT_CYC                                ((uint32_t)0x0000001F)
+#define  ARGB_DAT_CYC                                ((uint32_t)0x0000FFFF)
 
 /****************  Bit definition for ARGB_DAT_DATAR register  *****************/
 #define  ARGB_DATA                                   ((uint32_t)0x000000FF)
@@ -6117,9 +6070,13 @@ typedef struct
 #define  ARGB_BYTEIF                                 ((uint32_t)0x00000008)
 #define  ARGB_HALFIF                                 ((uint32_t)0x00000010)
 #define  ARGB_TXEIF                                  ((uint32_t)0x00000020)
+	
+#define  ARGB_STATE                                  ((uint32_t)0x000000C0)
+#define  ARGB_STATE_0                                ((uint32_t)0x00000040)
+#define  ARGB_STATE_1                                ((uint32_t)0x00000080)
 
 #define  ARGB_BIT_CNT                                ((uint32_t)0x00000700)
-#define  ARGB_BYTE_CNT                               ((uint32_t)0x0000F800)
+#define  ARGB_BYTE_CNT                               ((uint32_t)0xFFFF0000)
 
 /****************  Bit definition for ARGB_CNTR register  *****************/
 #define  ARGB_CNT                                    ((uint32_t)0x0001FFFF)

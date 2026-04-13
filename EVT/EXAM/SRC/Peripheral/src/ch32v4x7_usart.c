@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : ch32v4x7_usart.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/12/01
+* Version            : V1.0.1
+* Date               : 2026/04/09
 * Description        : This file provides all the USART firmware functions.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -21,7 +21,7 @@
 #define CTLR1_RWU_Set             ((uint16_t)0x0002) /* USART mute mode Enable Mask */
 #define CTLR1_RWU_Reset           ((uint16_t)0xFFFD) /* USART mute mode Enable Mask */
 #define CTLR1_SBK_Set             ((uint16_t)0x0001) /* USART Break Character send Mask */
-#define CTLR1_CLEAR_Mask          ((uint16_t)0xE9F3) /* USART CTLR1 Mask */
+#define CTLR1_CLEAR_Mask          ((uint16_t)0x29F3) /* USART CTLR1 Mask */
 #define CTLR2_Address_Mask        ((uint16_t)0xFFF0) /* USART address Mask */
 
 #define CTLR2_LINEN_Set           ((uint16_t)0x4000) /* USART LIN Enable Mask */
@@ -135,7 +135,17 @@ void USART_Init(USART_TypeDef *USARTx, USART_InitTypeDef *USART_InitStruct)
     uint64_t          apbclock = 0x00;
     RCC_ClocksTypeDef RCC_ClocksStatus;
 
-    usartxbase = (uint32_t)USARTx;
+    if((USART_InitStruct->USART_Parity & 0xF000) == 0xF000)
+    {
+        tmpreg = USARTx->CTLR4;
+        tmpreg &= ~USART_CTLR4_CHECK_SEL;
+        tmpreg |= USART_InitStruct->USART_Parity & 0xC;
+        USARTx->CTLR4 = (uint16_t)tmpreg;
+        USART_InitStruct->USART_Parity = 0;
+    }
+	
+	usartxbase = (uint32_t)USARTx;
+
     tmpreg = USARTx->CTLR2;
     tmpreg &= CTLR2_STOP_CLEAR_Mask;
     tmpreg |= (uint32_t)USART_InitStruct->USART_StopBits;
@@ -175,7 +185,7 @@ void USART_Init(USART_TypeDef *USARTx, USART_InitTypeDef *USART_InitStruct)
 	{
 		tmpreg |= fractionaldivider & ((uint8_t)0x0f);    
 	}
-	USARTx->BRR = (uint16_t)tmpreg;
+	USARTx->BRR = (uint32_t)tmpreg;
 }
 
 /*********************************************************************
@@ -244,7 +254,7 @@ void USART_ClockStructInit(USART_ClockInitTypeDef *USART_ClockInitStruct)
  * @fn      USART_Cmd
  *
  * @brief   Enables or disables the specified USART peripheral.
- *        reset values (Affects also the I2Ss).
+ *        reset values.
  *
  * @param   USARTx - where x can be 1 to 10 to select the USART peripheral.
  *          NewState: ENABLE or DISABLE.
@@ -267,7 +277,7 @@ void USART_Cmd(USART_TypeDef *USARTx, FunctionalState NewState)
  * @fn      USART_ITConfig
  *
  * @brief   Enables or disables the specified USART interrupts.
- *        reset values (Affects also the I2Ss).
+ *        reset values.
  *
  * @param   USARTx - where x can be 1 to 10 to select the USART peripheral.
  *          USART_IT - specifies the USART interrupt sources to be enabled or disabled.
@@ -278,6 +288,7 @@ void USART_Cmd(USART_TypeDef *USARTx, FunctionalState NewState)
  *            USART_IT_IDLE - Idle line detection interrupt.
  *            USART_IT_PE - Parity Error interrupt.
  *            USART_IT_ERR - Error interrupt.
+ *            USART_IT_MS_ER - Mask or Space Parity Error interrupt.
  *          NewState - ENABLE or DISABLE.
  *
  * @return  none
@@ -300,9 +311,13 @@ void USART_ITConfig(USART_TypeDef *USARTx, uint16_t USART_IT, FunctionalState Ne
     {
         usartxbase += 0x10;
     }
-    else
+    else if(usartreg == 0x03)
     {
         usartxbase += 0x14;
+    }
+    else if(usartreg == 0x04)
+    {
+        usartxbase += 0x1C;
     }
 
     if(NewState != DISABLE)
@@ -624,6 +639,9 @@ void USART_IrDACmd(USART_TypeDef *USARTx, FunctionalState NewState)
  *
  * @param   USARTx - where x can be 1 to 10 to select the USART peripheral.
  *          USART_FLAG - specifies the flag to check.
+ *            USART_FLAG_MS_ERR - Mark and space verify error flag.
+ *            USART_FLAG_RX_BUSY - Receive Busy flag.
+ *            USART_FLAG_CTS - CTS Change flag.
  *            USART_FLAG_LBD - LIN Break detection flag.
  *            USART_FLAG_TXE - Transmit data register empty flag.
  *            USART_FLAG_TC - Transmission Complete flag.
@@ -663,8 +681,9 @@ FlagStatus USART_GetFlagStatus(USART_TypeDef *USARTx, uint16_t USART_FLAG)
  *            USART_FLAG_RXNE - Receive data register not empty flag.
  *          Note-
  *            - PE (Parity error), FE (Framing error), NE (Noise error), ORE (OverRun 
- *            error) and IDLE (Idle line detected) flags are cleared by software 
- *            sequence: a read operation to USART_STATR register (USART_GetFlagStatus()) 
+ *            error),  MS_ER(Mask or Space Parity Error) 
+ *              and IDLE (Idle line detected) pending bits are cleared by 
+ *            software sequence: a read operation to USART_STATR register (USART_GetFlagStatus()) 
  *            followed by a read operation to USART_DATAR register (USART_ReceiveData()).
  *            - RXNE flag can be also cleared by a read to the USART_DATAR register 
  *            (USART_ReceiveData()).
@@ -698,6 +717,7 @@ void USART_ClearFlag(USART_TypeDef *USARTx, uint16_t USART_FLAG)
  *            USART_IT_NE - Noise Error interrupt.
  *            USART_IT_FE - Framing Error interrupt.
  *            USART_IT_PE - Parity Error interrupt.
+ *            USART_IT_MS_ER - Mask or Space Parity Error interrupt.
  *
  * @return  bitstatus: SET or RESET.
  */
@@ -718,9 +738,13 @@ ITStatus USART_GetITStatus(USART_TypeDef *USARTx, uint16_t USART_IT)
     {
         itmask &= USARTx->CTLR2;
     }
-    else
+    else if(usartreg == 0x03)
     {
         itmask &= USARTx->CTLR3;
+    }
+    else if(usartreg == 0x04)
+    {
+        itmask &= USARTx->CTLR4;
     }
 
     bitpos = USART_IT >> 0x08;
@@ -751,7 +775,8 @@ ITStatus USART_GetITStatus(USART_TypeDef *USARTx, uint16_t USART_IT)
  *            USART_IT_RXNE - Receive Data register not empty interrupt.
  *         Note-
  *            - PE (Parity error), FE (Framing error), NE (Noise error), ORE (OverRun 
- *            error) and IDLE (Idle line detected) pending bits are cleared by 
+ *            error),  MS_ER(Mask or Space Parity Error) 
+ *              and IDLE (Idle line detected) pending bits are cleared by 
  *            software sequence: a read operation to USART_STATR register 
  *            (USART_GetITStatus()) followed by a read operation to USART_DATAR register 
  *            (USART_ReceiveData()).
@@ -771,4 +796,22 @@ void USART_ClearITPendingBit(USART_TypeDef *USARTx, uint16_t USART_IT)
     bitpos = USART_IT >> 0x08;
     itmask = ((uint16_t)0x01 << (uint16_t)bitpos);
     USARTx->STATR = (uint16_t)~itmask;
+}
+/*********************************************************************
+ * @fn      USART_MARKorSPACE_Config
+ *
+ * @brief   Selects the USART mark or space mode.
+ *
+ * @param   USARTx - where x can be (1~8) to select the USART peripheral.
+ *          MARKorSPACE_Mode - specifies the USART mark or space mode.
+ *            USART_VerifyMode_NoMARKorSPACE - Close the USART mark or space mode.
+ *            USART_VerifyMode_MARK - Open the USART mark mode.
+ *            USART_VerifyMode_SPACE - Open the USART space mode.
+ *
+ * @return  none
+ */
+void USART_MARKorSPACE_Config(USART_TypeDef *USARTx, uint16_t MARKorSPACE_Mode)
+{
+    USARTx->CTLR4 &= ~USART_CTLR4_CHECK_SEL;
+    USARTx->CTLR4 |= MARKorSPACE_Mode;
 }

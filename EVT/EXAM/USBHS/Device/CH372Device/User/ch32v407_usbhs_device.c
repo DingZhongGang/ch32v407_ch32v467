@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : ch32v407_usbhs_device.c
  * Author             : WCH
- * Version            : V1.0.0
- * Date               : 2026/01/19
+ * Version            : V1.0.1
+ * Date               : 2026/04/10
  * Description        : This file provides all the USBHS firmware functions.
  *********************************************************************************
  * Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -118,6 +118,9 @@ void USBHS_Device_Endp_Init(void)
 {
     USBHSD->UEP_TX_EN = USBHS_UEP0_T_EN | USBHS_UEP1_T_EN | USBHS_UEP4_T_EN | USBHS_UEP6_T_EN;
     USBHSD->UEP_RX_EN = USBHS_UEP0_R_EN | USBHS_UEP1_R_EN | USBHS_UEP3_R_EN | USBHS_UEP5_R_EN;
+
+    USBHSD->UEP_TX_TOG_AUTO = USBHS_UEP1_T_EN | USBHS_UEP4_T_EN | USBHS_UEP6_T_EN;
+    USBHSD->UEP_RX_TOG_AUTO = USBHS_UEP1_R_EN | USBHS_UEP3_R_EN | USBHS_UEP5_R_EN;
 
     USBHSD->UEP0_MAX_LEN = DEF_USBD_UEP0_SIZE;
     USBHSD->UEP1_MAX_LEN = DEF_USB_EP1_HS_SIZE;
@@ -249,7 +252,8 @@ void USBHS_IRQHandler(void)
             switch(endp_num)
             {
             case DEF_UEP0:
-                if(USBHSD->UEP0_RX_CTRL & USBHS_UEP_R_SETUP_IS)
+                USBHSD->UEP0_RX_CTRL &= ~USBHS_UEP_R_DONE;
+                if((USBHSD->UEP0_RX_CTRL & USBHS_UEP_R_SETUP_IS) && !(USBHSD->UEP0_RX_CTRL & USBHS_UEP_R_DONE))
                 {
                     /* Store All Setup Values */
                     USBHS_SetupReqType = pUSBHS_SetupReqPak->bRequestType;
@@ -716,14 +720,14 @@ void USBHS_IRQHandler(void)
                         USBHSD->UEP0_TX_CTRL = USBHS_UEP_T_TOG_DATA1 | USBHS_UEP_T_RES_ACK;
                     }
                 }
-                USBHSD->UEP0_RX_CTRL &= ~USBHS_UEP_R_DONE;
+                
                 break;
             /* end-point 1 data out interrupt */
             case DEF_UEP1:
+                USBHSD->UEP1_RX_CTRL &= ~USBHS_UEP_R_DONE;
                 if(USBHSD->UEP1_RX_CTRL & USBHS_UEP_R_TOG_MATCH)
                 {
                     /* Write In Buffer */
-                    USBHSD->UEP1_RX_CTRL ^= USBHS_UEP_R_TOG_DATA1;
                     RingBuffer_Comm.PackLen[RingBuffer_Comm.LoadPtr] = USBHSD->UEP1_RX_LEN;
                     RingBuffer_Comm.LoadPtr++;
                     if(RingBuffer_Comm.LoadPtr == DEF_Ring_Buffer_Max_Blks)
@@ -742,15 +746,14 @@ void USBHS_IRQHandler(void)
                         USBHSD->UEP1_RX_CTRL = ((USBHSD->UEP1_RX_CTRL) & ~USBHS_UEP_R_RES_MASK) | USBHS_UEP_R_RES_ACK;
                     }
                 }
-                USBHSD->UEP1_RX_CTRL &= ~USBHS_UEP_R_DONE;
                 break;
 
             /* end-point 3 data out interrupt */
             case DEF_UEP3:
+                USBHSD->UEP3_RX_CTRL &= ~USBHS_UEP_R_DONE;
                 if(USBHSD->UEP3_RX_CTRL & USBHS_UEP_R_TOG_MATCH)
                 {
                     len = (uint16_t)(USBHSD->UEP3_RX_LEN);
-                    USBHSD->UEP3_RX_CTRL ^= USBHS_UEP_R_TOG_DATA1;
                     USBHSD->UEP3_RX_CTRL = ((USBHSD->UEP3_RX_CTRL) & ~USBHS_UEP_R_RES_MASK) | USBHS_UEP_R_RES_NAK;
                     for(i = 0; i < len; i++)
                     {
@@ -759,15 +762,14 @@ void USBHS_IRQHandler(void)
                     USBHSD->UEP4_TX_LEN = len;
                     USBHSD->UEP4_TX_CTRL = (USBHSD->UEP4_TX_CTRL & ~USBHS_UEP_T_RES_MASK) | USBHS_UEP_T_RES_ACK;
                 }
-                USBHSD->UEP3_RX_CTRL &= ~USBHS_UEP_R_DONE;
                 break;
 
             /* end-point 5 data out interrupt */
             case DEF_UEP5:
+                USBHSD->UEP5_RX_CTRL &= ~USBHS_UEP_R_DONE;
                 if(USBHSD->UEP5_RX_CTRL & USBHS_UEP_R_TOG_MATCH)
                 {
                     len = (uint16_t)(USBHSD->UEP5_RX_LEN);
-                    USBHSD->UEP5_RX_CTRL ^= USBHS_UEP_R_TOG_DATA1;
                     USBHSD->UEP5_RX_CTRL = ((USBHSD->UEP5_RX_CTRL) & ~USBHS_UEP_R_RES_MASK) | USBHS_UEP_R_RES_NAK;
                     for(i = 0; i < len; i++)
                     {
@@ -776,7 +778,6 @@ void USBHS_IRQHandler(void)
                     USBHSD->UEP6_TX_LEN = len;
                     USBHSD->UEP6_TX_CTRL = (USBHSD->UEP6_TX_CTRL & ~USBHS_UEP_T_RES_MASK) | USBHS_UEP_T_RES_ACK;
                 }
-                USBHSD->UEP5_RX_CTRL &= ~USBHS_UEP_R_DONE;
                 break;
 
             default:
@@ -791,6 +792,7 @@ void USBHS_IRQHandler(void)
             {
             /* end-point 0 data in interrupt */
             case DEF_UEP0:
+                USBHSD->UEP0_TX_CTRL &= ~USBHS_UEP_T_DONE;
                 if(USBHS_SetupReqLen == 0)
                 {
                     USBHSD->UEP0_RX_CTRL = USBHS_UEP_R_TOG_DATA1 | USBHS_UEP_R_RES_ACK;
@@ -829,30 +831,27 @@ void USBHS_IRQHandler(void)
                 {
                     USB_TestMode_Deal();
                 }
-                USBHSD->UEP0_TX_CTRL &= ~USBHS_UEP_T_DONE;
+                
                 break;
 
             /* end-point 1 data in interrupt */
             case DEF_UEP1:
-                USBHSD->UEP1_TX_CTRL = (USBHSD->UEP1_TX_CTRL & ~USBHS_UEP_T_RES_MASK) | USBHS_UEP_T_RES_NAK;
-                USBHSD->UEP1_TX_CTRL ^= USBHS_UEP_T_TOG_DATA1;
                 USBHSD->UEP1_TX_CTRL &= ~USBHS_UEP_T_DONE;
+                USBHSD->UEP1_TX_CTRL = (USBHSD->UEP1_TX_CTRL & ~USBHS_UEP_T_RES_MASK) | USBHS_UEP_T_RES_NAK;
                 break;
 
             /* end-point 4 data in interrupt */
             case DEF_UEP4:
-                USBHSD->UEP4_TX_CTRL = (USBHSD->UEP4_TX_CTRL & ~USBHS_UEP_T_RES_MASK) | USBHS_UEP_T_RES_NAK;
-                USBHSD->UEP4_TX_CTRL ^= USBHS_UEP_T_TOG_DATA1;
-                USBHSD->UEP3_RX_CTRL = (USBHSD->UEP3_RX_CTRL & ~USBHS_UEP_R_RES_MASK) | USBHS_UEP_R_RES_ACK;
                 USBHSD->UEP4_TX_CTRL &= ~USBHS_UEP_T_DONE;
+                USBHSD->UEP4_TX_CTRL = (USBHSD->UEP4_TX_CTRL & ~USBHS_UEP_T_RES_MASK) | USBHS_UEP_T_RES_NAK;
+                USBHSD->UEP3_RX_CTRL = (USBHSD->UEP3_RX_CTRL & ~USBHS_UEP_R_RES_MASK) | USBHS_UEP_R_RES_ACK;
                 break;
 
             /* end-point 6 data in interrupt */
             case DEF_UEP6:
-                USBHSD->UEP6_TX_CTRL = (USBHSD->UEP6_TX_CTRL & ~USBHS_UEP_T_RES_MASK) | USBHS_UEP_T_RES_NAK;
-                USBHSD->UEP6_TX_CTRL ^= USBHS_UEP_T_TOG_DATA1;
-                USBHSD->UEP5_RX_CTRL = (USBHSD->UEP5_RX_CTRL & ~USBHS_UEP_R_RES_MASK) | USBHS_UEP_R_RES_ACK;
                 USBHSD->UEP6_TX_CTRL &= ~USBHS_UEP_T_DONE;
+                USBHSD->UEP6_TX_CTRL = (USBHSD->UEP6_TX_CTRL & ~USBHS_UEP_T_RES_MASK) | USBHS_UEP_T_RES_NAK;
+                USBHSD->UEP5_RX_CTRL = (USBHSD->UEP5_RX_CTRL & ~USBHS_UEP_R_RES_MASK) | USBHS_UEP_R_RES_ACK;
                 break;
 
             default:

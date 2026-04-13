@@ -13,7 +13,7 @@
 #include "string.h"
 #include "flash.h"
 #include "core_riscv.h"
-
+#include "usb_inf.h"
 /******************************************************************************/
 
 iapfun jump2app;
@@ -24,8 +24,9 @@ vu8 Verify_Star_flag = 0;
 u8 Fast_Program_Buf[1024*10];
 vu32 CodeLen = 0;
 vu8 End_Flag = 0;
-u8 EP2_Rx_Buffer[USBD_DATA_SIZE+4];
-#define  isp_cmd_t   ((isp_cmd  *)EP2_Rx_Buffer)
+u8 IAP_Deal_Buf[USBD_DATA_SIZE+4];
+#define  isp_cmd_t   ((isp_cmd  *)IAP_Deal_Buf)
+
 
 #define  Size_256B         0x100
 #define  Size_4KB          0x1000
