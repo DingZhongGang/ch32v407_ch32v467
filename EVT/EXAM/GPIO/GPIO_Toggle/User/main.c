@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/12/01
+* Version            : V1.0.1
+* Date               : 2026/03/12
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -39,7 +39,6 @@ void GPIO_Toggle_INIT(void)
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_High;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
-    RCC_HBPeriphClockCmd(RCC_HBPeriph_DVP,ENABLE);
 }
 
 /*********************************************************************

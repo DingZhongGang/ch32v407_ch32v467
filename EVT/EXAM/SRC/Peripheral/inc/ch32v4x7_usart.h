@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT  *******************************
 * File Name          : ch32v4x7_usart.h
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/12/01
+* Version            : V1.0.1
+* Date               : 2026/04/09
 * Description        : This file contains all the functions prototypes for the 
 *                      USART firmware library.
 *********************************************************************************
@@ -68,6 +68,9 @@ typedef struct
 } USART_ClockInitTypeDef;
 
 /* USART_Word_Length */ 
+#define USART_WordLength_5b                  ((uint16_t)0xC000)
+#define USART_WordLength_6b                  ((uint16_t)0x8000)
+#define USART_WordLength_7b                  ((uint16_t)0x4000)
 #define USART_WordLength_8b                  ((uint16_t)0x0000)
 #define USART_WordLength_9b                  ((uint16_t)0x1000)
                                     
@@ -81,6 +84,8 @@ typedef struct
 #define USART_Parity_No                      ((uint16_t)0x0000)
 #define USART_Parity_Even                    ((uint16_t)0x0400)
 #define USART_Parity_Odd                     ((uint16_t)0x0600) 
+#define USART_Parity_Space                   ((uint16_t)0xF00C)
+#define USART_Parity_Mark                    ((uint16_t)0xF008) 
 
 /* USART_Mode */ 
 #define USART_Mode_Rx                        ((uint16_t)0x0004)
@@ -121,6 +126,7 @@ typedef struct
 #define USART_IT_ORE_ER                      ((uint16_t)0x0360)
 #define USART_IT_NE                          ((uint16_t)0x0260)
 #define USART_IT_FE                          ((uint16_t)0x0160)
+#define USART_IT_MS_ER                       ((uint16_t)0x0B81)
 
 #define USART_IT_ORE                          USART_IT_ORE_ER
 
@@ -141,6 +147,8 @@ typedef struct
 #define USART_IrDAMode_Normal                ((uint16_t)0x0000)
 
 /* USART_Flags */
+#define USART_FLAG_MS_ERR                    ((uint16_t)0x0800)
+#define USART_FLAG_RX_BUSY                   ((uint16_t)0x0400)
 #define USART_FLAG_CTS                       ((uint16_t)0x0200)
 #define USART_FLAG_LBD                       ((uint16_t)0x0100)
 #define USART_FLAG_TXE                       ((uint16_t)0x0080)
@@ -152,6 +160,10 @@ typedef struct
 #define USART_FLAG_FE                        ((uint16_t)0x0002)
 #define USART_FLAG_PE                        ((uint16_t)0x0001)
 
+/* USART_MARKorSPACE_Mode */
+#define USART_VerifyMode_NoMARKorSPACE       ((uint16_t)0x0000)
+#define USART_VerifyMode_MARK                ((uint16_t)0x0008)
+#define USART_VerifyMode_SPACE               ((uint16_t)0x000C)
 
 void USART_DeInit(USART_TypeDef* USARTx);
 void USART_Init(USART_TypeDef* USARTx, USART_InitTypeDef* USART_InitStruct);

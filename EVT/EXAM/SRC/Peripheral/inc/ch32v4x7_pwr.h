@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT  *******************************
 * File Name          : ch32v4x7_pwr.h
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/12/01
+* Version            : V1.0.1
+* Date               : 2025/04/10
 * Description        : This file contains all the functions prototypes for the PWR  
 *                      firmware library.
 *********************************************************************************
@@ -43,16 +43,6 @@
 #define PWR_VDDK_Level6             ((uint32_t)0x06000000)
 #define PWR_VDDK_Level7             ((uint32_t)0x07000000)
 
-/* VDD12A_detection_level  */
-#define PWR_VDD12A_Level0           ((uint32_t)0x00000000)
-#define PWR_VDD12A_Level1           ((uint32_t)0x08000000)
-#define PWR_VDD12A_Level2           ((uint32_t)0x10000000)
-#define PWR_VDD12A_Level3           ((uint32_t)0x18000000)
-#define PWR_VDD12A_Level4           ((uint32_t)0x20000000)
-#define PWR_VDD12A_Level5           ((uint32_t)0x28000000)
-#define PWR_VDD12A_Level6           ((uint32_t)0x30000000)
-#define PWR_VDD12A_Level7           ((uint32_t)0x38000000)
-
 /* STOP_mode_entry */
 #define PWR_STOPEntry_WFI           ((uint8_t)0x01)
 #define PWR_STOPEntry_WFE           ((uint8_t)0x02)
@@ -77,10 +67,8 @@ void PWR_EnterSTANDBYMode_RAM_LV(void);
 void PWR_EnterSTANDBYMode_RAM_VBAT_EN(void);
 void PWR_EnterSTANDBYMode_RAM_LV_VBAT_EN(void);
 void PWR_EnterSTOPMode_RAM_LV(uint32_t PWR_Regulator, uint8_t PWR_STOPEntry);
-void PWR_VDDKLevelConfig(uint32_t PWR_VDDK_Level);
 void PWR_VDD18Cmd(FunctionalState NewState);
 void PWR_VDD18LevelConfig(uint32_t PWR_VDD18_Level);
-void PWR_VDD12ALevelConfig(uint32_t PWR_VDD12A_Level);
 
 #ifdef __cplusplus
 }

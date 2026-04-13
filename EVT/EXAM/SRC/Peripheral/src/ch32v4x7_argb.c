@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT  *******************************
 * File Name          : ch32v4x7_argb.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2026/02/10
+* Version            : V1.0.1
+* Date               : 2026/04/08
 * Description        : This file provides all the ARGB firmware functions.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -189,7 +189,6 @@ FlagStatus ARGB_GetFlagStatus(ARGB_IT_Typedef ARGB_IT)
     }
 }
 
-
 /*********************************************************************
  * @fn      ARGB_ClearITPendingBit
  *
@@ -245,7 +244,7 @@ FlagStatus ARGB_GetITStatus(ARGB_IT_Typedef ARGB_IT)
  *
  * @return  Current base counter value
  */
-uint32_t ARGB_GetCurrBaseCNT()
+uint32_t ARGB_GetCurrBaseCNT(void)
 {
     return (ARGB->CNTR);
 }
@@ -257,9 +256,9 @@ uint32_t ARGB_GetCurrBaseCNT()
  *
  * @return  Current bit counter value
  */
-uint32_t ARGB_GetBitCNT()
+uint32_t ARGB_GetBitCNT(void)
 {
-    return (ARGB->STATR & (ARGB_BIT_CNT));
+    return (ARGB->STATR & (ARGB_BIT_CNT)) >> 8;
 }
 
 /*********************************************************************
@@ -269,8 +268,33 @@ uint32_t ARGB_GetBitCNT()
  *
  * @return  Current byte counter value
  */
-uint32_t ARGB_GetByteCNT()
+uint32_t ARGB_GetByteCNT(void)
 {
-    return (ARGB->STATR & (ARGB_BYTE_CNT));
+    return (ARGB->STATR & (ARGB_BYTE_CNT)) >> 16;
 }
 
+/*********************************************************************
+ * @fn      ARGB_SendData
+ *
+ * @brief   Transmits single data through the ARGB peripheral.
+ *
+ * @param   Data - the data to transmit.
+ *
+ * @return  none
+ */
+void ARGB_SendData(uint8_t Data)
+{
+    ARGB->DATAR = Data;
+}
+
+/*********************************************************************
+ * @fn      ARGB_GetCurrState
+ *
+ * @brief   Get currently sending status through the ARGB peripheral.
+ *
+ * @return  The currently sending status, which can be ARGB_Idle, ARGB_SendingData, or ARGB_SendingRST.
+ */
+ARGB_STATypeDef ARGB_GetCurrState(void)
+{
+    return ((ARGB->STATR & ARGB_STATE) >> 6);
+}

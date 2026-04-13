@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2026/02/08
+* Version            : V1.0.1
+* Date               : 2026/03/06
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -142,7 +142,7 @@ int main(void)
 #endif
     PWR_VDD18Cmd(ENABLE);
     /* If the PSRAM power is turned on, it needs to be stabilized for a period of time */
-    Delay_Us(50);
+    Delay_Us(100);
     
     printf("\r\n##########\r\n");
     while(1)

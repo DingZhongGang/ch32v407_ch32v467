@@ -17,6 +17,8 @@
 #include "ch32v4x7_usbhs_device.h"
 #define PRINT     0
 
+#define DEF_VERSION       0x0101
+
 #define USBD_DATA_SIZE    64
 #define FLASH_Base        0x08005000
 
@@ -66,7 +68,7 @@ struct{
 
 typedef void (*iapfun)(void);
 
-extern u8 EP2_Rx_Buffer[USBD_DATA_SIZE+4];
+extern u8 IAP_Deal_Buf[USBD_DATA_SIZE+4];
 
 u8 RecData_Deal(void);
 u8 Jmp_APP_flag(void);

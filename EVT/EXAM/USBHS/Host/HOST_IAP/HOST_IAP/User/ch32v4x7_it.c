@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : ch32v4x7_it.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/12/01
+* Version            : V1.0.1
+* Date               : 2026/04/10
 * Description        : Main Interrupt Service Routines.
 *********************************************************************************
 * Copyright (c) 2025 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -13,6 +13,7 @@
 
 void NMI_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void HardFault_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void SW_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 
 /*********************************************************************
  * @fn      NMI_Handler
@@ -43,4 +44,16 @@ void HardFault_Handler(void)
   }
 }
 
-
+/*********************************************************************
+ * @fn      SW_Handler
+ *
+ * @brief   This function handles Software exception.
+ *
+ * @return  none
+ */
+void SW_Handler(void)
+{
+  __asm("li  a6, 0x8000");
+  __asm("jr  a6");
+  while (1);
+}
