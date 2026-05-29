@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/05/22
+* Version            : V1.0.1
+* Date               : 2026/05/15
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -57,7 +57,7 @@
 
 /* Global Variable */
 u8       SPI_FLASH_BUF[4096];
-const u8 TEXT_Buf[] = {"CH32F103 SPI FLASH W25Qxx"};
+const u8 TEXT_Buf[] = {"CH32 SPI FLASH W25Qxx"};
 #define SIZE    sizeof(TEXT_Buf)
 
 /*********************************************************************

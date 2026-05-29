@@ -1,5 +1,5 @@
 
-南京沁恒微电子股份有限公司 2026.04
+南京沁恒微电子股份有限公司 2026.05
 最新资料请到我们的网站上查询
 https://wch.cn
 
@@ -197,7 +197,9 @@ https://wch.cn
   |      |      |      |      |      |      |-- USB_NCM-NetWorkAdaptor: USB NCM网络适配器例程
   |      |      |      |      |      |      |-- USB_RNDIS-NetWorkAdaptor: USB RNDIS网络适配器例程
   |      |      |      |      |      |      |-- SimulateCDC：模拟一个CDC串口，使用串口2收发。
-  |      |      |      |      |      |      |-- SimulateCDC-HID：模拟一个CDC串口，使用串口2收发,HID中断端点下发数据取反上传。  
+  |      |      |      |      |      |      |-- SimulateCDC-HID：模拟一个CDC串口，使用串口2收发,HID中断端点下发数据取反上传。 
+  |      |      |      |      |      |-- DEVICE_Host
+  |      |      |      |      |      |      |-- Device_Host_DataTrans: USB HS 键盘透传与宏功能示例，支持双 USB Host/Device 切换、休眠唤醒及按键扩展功能 
   |      |      |      |      |      |-- Dual_device
   |      |      |      |      |      |      |-- cdc_transfer：双USB口cdc传输
   |      |      |      |      |      |      |-- rndis_transfer：双USB口rndis传输

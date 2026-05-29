@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : usbd_composite_km.c
  * Author             : WCH
- * Version            : V1.0.0
- * Date               : 2026/01/19
+ * Version            : V1.0.1
+ * Date               : 2026/05/20
  * Description        : USB keyboard and mouse processing.
 *********************************************************************************
 * Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -669,7 +669,7 @@ void USB_Sleep_Wakeup_CFG( void )
 {
     EXTI_InitTypeDef EXTI_InitStructure = { 0 };
 
-    EXTI_InitStructure.EXTI_Line = EXTI_Line21;
+    EXTI_InitStructure.EXTI_Line = USBHS_EXTI_Line;
     EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Event;
     EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
     EXTI_InitStructure.EXTI_LineCmd = ENABLE;
@@ -691,11 +691,13 @@ void MCU_Sleep_Wakeup_Operate( void )
     EXTI_ClearFlag( EXTI_Line12 | EXTI_Line13 | EXTI_Line14 | EXTI_Line15 );
     EXTI_ClearFlag( EXTI_Line4 | EXTI_Line5 | EXTI_Line6 | EXTI_Line7 );
 
-    USBHSD->CONTROL |= USBHS_UD_PHY_SUSPENDM;
     PWR_EnterSTOPMode(PWR_Regulator_LowPower,PWR_STOPEntry_WFE);
 
+    USBHSD->CONTROL |= USBHS_UD_PHY_SUSPENDM;
     SystemInit();
     SystemCoreClockUpdate();
+
+    USBHS_RCC_Init(ENABLE);
 
     if( EXTI_GetFlagStatus( EXTI_Line12 | EXTI_Line13 | EXTI_Line14 | EXTI_Line15 ) != RESET  )
     {

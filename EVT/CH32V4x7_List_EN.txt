@@ -1,5 +1,5 @@
 
-Nanjing Qinheng Microelectronics Co., Ltd. 2026.04
+Nanjing Qinheng Microelectronics Co., Ltd. 2026.05
 
 https://wch-ic.com
 
@@ -200,6 +200,8 @@ Directory
   |      |      |      |      |      |      |--USB_NCM-NetWorkAdaptor: USB NCM routines
   |      |      |      |      |      |      |-- SimulateCDC:Simulate a CDC serial port and use serial port 2 to send and receive.
   |      |      |      |      |      |      |-- SimulateCDC-HID:Simulate a CDC serial port, use serial port 2 to send and receive, HID interrupt endpoints to send and receive data to reverse and upload.  
+  |      |      |      |      |      |-- DEVICE_Host
+  |      |      |      |      |      |      |-- Device_Host_DataTrans: USB HS keyboard passthrough and macro demo supporting dual USB Host/Device switching, sleep-wakeup, and key expansion functions
   |      |      |      |      |      |-- Dual_device
   |      |      |      |      |      |      |-- cdc_transfer：Dual USB port CDC transmission
   |      |      |      |      |      |      |-- rndis_transfer：Dual USB port RNDIS transmission

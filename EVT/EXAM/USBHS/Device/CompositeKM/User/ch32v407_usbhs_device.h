@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : ch32v407_usbhs_device.h
  * Author             : WCH
- * Version            : V1.0.0
- * Date               : 2026/01/19
+ * Version            : V1.0.1
+ * Date               : 2026/05/20
  * Description        : header file of ch32v407_usbhs_device.c
  *********************************************************************************
  * Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -38,6 +38,7 @@ extern "C" {
 #define RCC_HBPeriph_USBHS      RCC_HBPeriph_USBHS1
 #define RCC_UTMIcmd(x)          RCC_UTMI1cmd(x)
 #define USBHS_IRQHandler        USBHS1_IRQHandler
+#define USBHS_EXTI_Line         EXTI_Line18
 
 #define USBHSD_UEP_RXDMA_BASE         0x40024024
 #define USBHSD_UEP_TXDMA_BASE         0x40024040
@@ -51,11 +52,13 @@ extern "C" {
 #define RCC_HBPeriph_USBHS      RCC_HBPeriph_USBHS2
 #define RCC_UTMIcmd(x)          RCC_UTMI2cmd(x)
 #define USBHS_IRQHandler        USBHS2_IRQHandler
+#define USBHS_EXTI_Line         EXTI_Line20
 
 #define USBHSD_UEP_RXDMA_BASE         0x40023424
 #define USBHSD_UEP_TXDMA_BASE         0x40023440
 #define USBHSD_UEP_TXLEN_BASE         0x400234A0
 #define USBHSD_UEP_TXCTL_BASE         0x400234A2
+
 #endif
 
 #endif
@@ -160,6 +163,7 @@ extern __attribute__ ((aligned(16))) uint8_t USBHS_EP2_Tx_Buf[ ];
 extern void USBHS_Device_Endp_Init ( void );
 extern void USBHS_Device_Init ( FunctionalState sta );
 extern void USBHS_Send_Resume(void);
+extern void USBHS_RCC_Init(FunctionalState sta);
 #ifdef __cplusplus
 }
 #endif

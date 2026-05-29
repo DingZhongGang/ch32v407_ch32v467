@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : ch32v407_usbhs_device.c
  * Author             : WCH
- * Version            : V1.0.1
- * Date               : 2026/04/10
+ * Version            : V1.0.2
+ * Date               : 2026/05/20
  * Description        : This file provides all the USBHS firmware functions.
  *********************************************************************************
  * Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -196,7 +196,6 @@ void USBHS_RCC_Init(FunctionalState sta)
     {
         RCC_HBPeriphClockCmd(RCC_HBPeriph_USBHS, DISABLE);
         RCC_UTMIcmd(DISABLE);
-		RCC->CTLR &= ~RCC_USBHSPLLON;
     }
 }
 
