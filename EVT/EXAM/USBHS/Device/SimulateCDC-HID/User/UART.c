@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : UART.C
 * Author             : WCH
-* Version            : V1.01
-* Date               : 2026/01/19
+* Version            : V1.0.2
+* Date               : 2026/05/20
 * Description        : uart serial port related initialization and processing
 *******************************************************************************
 * Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -101,7 +101,7 @@ void UART_CfgInit( uint32_t baudrate, uint8_t stopbits, uint8_t parity )
     DEF_UART->CTLR1 &= ~( USART_CTLR1_TE | USART_CTLR1_RE );
 
     /* USART Hard configured: */
-    /* Configure USART Rx (PF3) as input floating */
+    /* Configure USART Rx (PA3) as input floating */
     GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_3;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IPU;
     GPIO_Init( GPIOA, &GPIO_InitStructure );

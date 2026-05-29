@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT  *******************************
  * File Name          : usb_host_config.h
  * Author             : WCH
- * Version            : V1.0.0
- * Date               : 2026/01/19
+ * Version            : V1.0.1
+ * Date               : 2026/05/20
  * Description        : 
 *********************************************************************************
 * Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -28,7 +28,7 @@ extern "C" {
 
 /* USB Host Port General Control */
 
-#define DEF_TOTAL_ROOT_HUB          2
+#define DEF_TOTAL_ROOT_HUB          1
 #define DEF_USB_PORT_FS_EN          0
 #define DEF_USB_PORT_HS_EN          1
 #define DEF_USB_PORT_FS             0x00                                        
