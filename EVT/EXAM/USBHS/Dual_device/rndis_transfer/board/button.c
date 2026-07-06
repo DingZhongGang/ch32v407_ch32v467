@@ -1,11 +1,11 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : button.c
 * Author             : WCH
-* Version            : V1.0
-* Date               : 2026/02/09
+* Version            : V1.0.3
+* Date               : 2026/07/01
 * Description        : Button driver for ch32v407.
 *********************************************************************************
-* Copyright (c) 2025 Nanjing Qinheng Microelectronics Co., Ltd.
+* Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
@@ -25,7 +25,7 @@
  */
 usb_rst_e btn_init(void)
 {
-    GPIO_InitTypeDef GPIO_InitStructure;
+    GPIO_InitTypeDef GPIO_InitStructure = {0};
 
     RCC_PB2PeriphClockCmd(RCC_PB2Periph_GPIOA, ENABLE);
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |

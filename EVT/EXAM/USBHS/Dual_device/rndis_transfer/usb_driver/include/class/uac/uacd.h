@@ -1,29 +1,37 @@
 /********************************** (C) COPYRIGHT *******************************
-* File Name          : usbd_config.h
+* File Name          : uacd.h
 * Author             : WCH
-* Version            : V1.0
-* Date               : 2025/08/13
-* Description        : Usb device config headfile.
+* Version            : V1.2
+* Date               : 2026/05/26
+* Description        : Uac device class define.
 *********************************************************************************
-* Copyright (c) 2025 Nanjing Qinheng Microelectronics Co., Ltd.
+* Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
-#ifndef __USBD_CONFIG_H_
-#define __USBD_CONFIG_H_
+#ifndef __UACD_H_
+#define __UACD_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* @define */
-#define USBD_CTRL_TABLE_MAX_ITEMS       32
-#define USBD_ITF_TABLE_MAX_ITEMS        16
+/* @include */
+#include <stdint.h>
 
-#define USBD_DRIVER_LOG_INFO
-#define USBD_DRIVER_LOG_WARNING
-#define USBD_DRIVER_LOG_ERROR
+#include "usb_define.h"
+#include "class/uac/uac.h"
+
+/* @struct */
+typedef struct
+{
+    uint8_t itf_num;
+
+    usb_endp_t ep_iso;
+
+    uint8_t alt_setting;
+} uacd_streaming_itf_t;
 
 #ifdef __cplusplus
 }

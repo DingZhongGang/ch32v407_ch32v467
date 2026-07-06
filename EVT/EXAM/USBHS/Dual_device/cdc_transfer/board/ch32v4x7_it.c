@@ -1,12 +1,12 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : ch32v4x7_it.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/12/01
+* Version            : V1.2
+* Date               : 2026/05/26
 * Description        : Main Interrupt Service Routines.
 *********************************************************************************
-* Copyright (c) 2025 Nanjing Qinheng Microelectronics Co., Ltd.
-* Attention: This software (modified or not) and binary are used for 
+* Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #include "ch32v4x7_it.h"

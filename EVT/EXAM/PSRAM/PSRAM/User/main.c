@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/12/01
+* Version            : V1.0.1
+* Date               : 2026/06/30
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -14,6 +14,7 @@
 #include "debug.h"
 #include "string.h"
 #include "PSRAM.h"
+#include <stdlib.h>
 
 #define PSRAM_ADDR      0X80000000
 #define BUFFER_SIZE     1024
@@ -39,24 +40,28 @@ void PSRAM_INIT(void)
     PSRAMTimingStruct.PSRAM_tcph=0xC;
     PSRAMTimingStruct.PSRAM_txlpd=0x7;
     PSRAMInitStruct.PSRAM_cfifo=PSRAM_CFIFO_BTWWRRD;
+    #if(PSRAM_Memory==Memory32Mb)
     PSRAMInitStruct.PSRAM_cap_cfg=PSRAM_CAPCFG_32M;
+    #elif (PSRAM_Memory==Memory32Mb) 
+     PSRAMInitStruct.PSRAM_cap_cfg=PSRAM_CAPCFG_64M;
+    #endif
     PSRAMInitStruct.PSRAM_exti_lpmd=PSRAM_EXIT_LPMD;
     PSRAMInitStruct.PSRAMTimingStruct=&PSRAMTimingStruct;
     PSRAMInit(&PSRAMInitStruct); 
     Delay_Ms(1);
 	//Set the Read Latency and Write Latency
-    SetWrLatency(MR4_Write_200M,Latency_200M);
-    SetRdLatency(MR0_Read_200M,Latency_200M,Read_Variable);    
+    SetWrLatency(MR4_Write_300M,Latency_300M);
+    SetRdLatency(MR0_Read_300M,Latency_300M,Read_Variable);    
 }
 
 /*********************************************************************
- * @fn      PSRAM_200MHz_HSE
+ * @fn      PSRAM_300MHz_HSE
  *
- * @brief   Sets PSRAM clock frequency to 200MHz.
+ * @brief   Sets PSRAM clock frequency to 300MHz.
  *
  * @return  none
  */
-static void PSRAM_200MHz_HSE(void)
+static void PSRAM_300MHz_HSE(void)
 {
     __IO uint32_t StartUpCounter = 0, HSEStatus = 0 , FLASH_Temp = 0;
     RCC->CTLR |= (uint32_t)0x00000001;
@@ -96,14 +101,14 @@ static void PSRAM_200MHz_HSE(void)
     if (HSEStatus == (uint32_t)0x01)
     {
       /* HCLK = SYSCLK  */
-      RCC->CFGR0 |= (uint32_t)RCC_HPRE_DIV1;
+      RCC->CFGR0 |= (uint32_t)RCC_HPRE_DIV2;
       /* PCLK2 = HCLK */
       RCC->CFGR0 |= (uint32_t)RCC_PPRE2_DIV1;
       /* PCLK1 = HCLK */
       RCC->CFGR0 |= (uint32_t)RCC_PPRE1_DIV1;
 
-      /* PLL configuration: HCLK = (HSE * 8) / 1 = 200 MHz */
-      RCC->CFGR0 |= (uint32_t)(RCC_PLLSRC_HSE | RCC_PLLMULL8);
+      /* PLL configuration: HCLK = (HSE * 12) / 2 = 150 MHz */
+      RCC->CFGR0 |= (uint32_t)(RCC_PLLSRC_HSE | RCC_PLLMULL12);
 
       /* Enable PLL */
       RCC->CTLR |= RCC_PLLON;
@@ -158,18 +163,18 @@ int main(void)
     u32 i=0;
     u32 times=0;
     SystemCoreClockUpdate();
-    PSRAM_200MHz_HSE();
+    PSRAM_300MHz_HSE();
     SystemCoreClockUpdate();
     USART_Printf_Init(115200);	
     Delay_Init();
-    printf("SystemClk:%d\r\n", SystemCoreClock);
+    printf("SystemClk:%d\r\n", SystemClock);
     printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
     printf("PSRAM TEST\r\n");
     PSRAM_INIT();
     while(1){
     for(int j=0; j<BUFFER_SIZE; j++)
     {
-      TxBuffer[j] = j;
+      TxBuffer[j] = random();
       RxBuffer[j]=0;
 	  }
     /*     1.  CPU write  CPU read */
@@ -183,7 +188,7 @@ int main(void)
     {
       RxBuffer[i]= *(vu32*)(PSRAM_ADDR + 4*i);  
     } 
-    if(memcmp(TxBuffer, RxBuffer, BUFFER_SIZE))
+    if(memcmp(TxBuffer, RxBuffer, BUFFER_SIZE*4))
     {
       printf("  fail\n\r");
       for(int k=0;k<BUFFER_SIZE;k++)
@@ -205,14 +210,14 @@ int main(void)
     /*     2. DMA write  DMA read */
     for(int j=0; j<BUFFER_SIZE; j++)
     {
-      TxBuffer[j] = j+1;
+      TxBuffer[j] = random();
       RxBuffer[j]=0;
 	  }
     printf("DMA write data\r\n");
     PSRAMDMAWrite(TxBuffer,PSRAM_ADDR,BUFFER_SIZE,PSRAM_MEMORYSIZE_32bit,DMA_BRST_NUM2,DMA_PAUSE_TIM0 );
     printf("DMA Read data\r\n");
     PSRAMDMARead(RxBuffer,PSRAM_ADDR,BUFFER_SIZE,PSRAM_MEMORYSIZE_32bit,DMA_BRST_NUM2,DMA_PAUSE_TIM0 );
-    if(memcmp(TxBuffer, RxBuffer, BUFFER_SIZE))
+    if(memcmp(TxBuffer, RxBuffer, BUFFER_SIZE*4))
     {
       printf("  fail\n\r");
       for(int k=0;k<BUFFER_SIZE;k++)
@@ -234,20 +239,17 @@ int main(void)
     /*     3.DMA write CPU read */
     for(int j=0; j<BUFFER_SIZE; j++)
     {
-      TxBuffer[j] = j+2;
+      TxBuffer[j] = random();
       RxBuffer[j]=0;
 	  }
     printf("DMA write data\r\n");
-    PSRAM_DMA_CFIFO(ENABLE);// This function must be available in this read/write mode
     PSRAMDMAWrite(TxBuffer,PSRAM_ADDR,BUFFER_SIZE,PSRAM_MEMORYSIZE_32bit,DMA_BRST_NUM2,DMA_PAUSE_TIM0 );
-    PSRAM_DMA_CFIFO(DISABLE);// This function must be available in this read/write mode
-    PSRAM_DMA_DIR(DMA_DIR_MEM);// This function must be available in this read/write mode
     printf("CPU Read data\r\n");
     for(i=0; i<BUFFER_SIZE; i++)
     {
       RxBuffer[i]= *(vu32*)(PSRAM_ADDR + 4*i);  
     } 
-    if(memcmp(TxBuffer, RxBuffer, BUFFER_SIZE))
+    if(memcmp(TxBuffer, RxBuffer, BUFFER_SIZE*4))
     {
       printf("  fail\n\r");
       for(int k=0;k<BUFFER_SIZE;k++)
@@ -269,7 +271,7 @@ int main(void)
     /*     4.CPU write DMA read */
     for(int j=0; j<BUFFER_SIZE; j++)
     {
-      TxBuffer[j] = j+3;
+      TxBuffer[j] = random();
       RxBuffer[j]=0;
 	  }
     printf("CPU write data\r\n");
@@ -279,7 +281,7 @@ int main(void)
 	  }
     printf("DMA Read data\r\n");
     PSRAMDMARead(RxBuffer,PSRAM_ADDR,BUFFER_SIZE,PSRAM_MEMORYSIZE_32bit,DMA_BRST_NUM2,DMA_PAUSE_TIM0 );
-    if(memcmp(TxBuffer, RxBuffer, BUFFER_SIZE))
+    if(memcmp(TxBuffer, RxBuffer, BUFFER_SIZE*4))
     {
       printf("  fail\n\r");
       for(int k=0;k<BUFFER_SIZE;k++)

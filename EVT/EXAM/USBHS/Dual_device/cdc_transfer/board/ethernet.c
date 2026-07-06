@@ -1,9 +1,9 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : ethernet.c
 * Author             : WCH
-* Version            : V1.0
-* Date               : 2026/01/19
-* Description        : Ethernet driver for ch32v307.
+* Version            : V1.3
+* Date               : 2026/07/01
+* Description        : Ethernet driver for ch32v4x7.
 *********************************************************************************
 * Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for
@@ -20,7 +20,7 @@
 #include "ethernet.h"
 #include "eth_driver.h"
 
-#include "class/cdc/cdcd.h"
+#include "usb_driver.h"
 
 /* @global */
 uint8_t MACAddr[6];

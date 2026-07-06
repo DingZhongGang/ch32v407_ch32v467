@@ -88,7 +88,7 @@ static rt_err_t ch32_configure(struct rt_serial_device *serial, struct serial_co
 
     if(uart->USARTx == USART1)
     {
-        GPIO_InitTypeDef GPIO_InitStructure;
+        GPIO_InitTypeDef GPIO_InitStructure = {0};
             RCC_PB2PeriphClockCmd(RCC_PB2Periph_AFIO | RCC_PB2Periph_USART1 | RCC_PB2Periph_GPIOA, ENABLE);
 
     //        uart->irq=USART1_IRQn;
@@ -247,7 +247,7 @@ int rt_hw_usart_init(void)
 
     if(uart->USARTx == USART1)
     {
-            GPIO_InitTypeDef GPIO_InitStructure;
+            GPIO_InitTypeDef GPIO_InitStructure = {0};
             RCC_PB2PeriphClockCmd(RCC_PB2Periph_AFIO | RCC_PB2Periph_USART1 | RCC_PB2Periph_GPIOA, ENABLE);
 
     //        uart->irq=USART1_IRQn;

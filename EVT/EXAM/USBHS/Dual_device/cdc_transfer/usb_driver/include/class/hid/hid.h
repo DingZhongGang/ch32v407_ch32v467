@@ -1,11 +1,11 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : hid.h
 * Author             : WCH
-* Version            : V1.0
-* Date               : 2025/08/18
+* Version            : V1.2
+* Date               : 2026/05/26
 * Description        : Hid class define.
 *********************************************************************************
-* Copyright (c) 2025 Nanjing Qinheng Microelectronics Co., Ltd.
+* Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
@@ -252,7 +252,7 @@ typedef enum
     HID_ITF_PROTOCOL_NONE,
     HID_ITF_PROTOCOL_KEYBOARD,
     HID_ITF_PROTOCOL_MOUSE,
-} hid_interface_protocol_e;
+} hid_itf_protocol_e;
 
 typedef enum
 {

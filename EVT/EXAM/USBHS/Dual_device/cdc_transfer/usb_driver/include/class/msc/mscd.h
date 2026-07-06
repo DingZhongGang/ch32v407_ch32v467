@@ -1,11 +1,11 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : mscd.h
 * Author             : WCH
-* Version            : V1.0
-* Date               : 2025/10/30
+* Version            : V1.2
+* Date               : 2026/05/26
 * Description        : Msc device class define.
 *********************************************************************************
-* Copyright (c) 2025 Nanjing Qinheng Microelectronics Co., Ltd.
+* Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
@@ -43,9 +43,8 @@ typedef struct
     uint8_t ready;
     uint8_t stage;
     uint8_t dir;
-    uint32_t total;
-    uint32_t offset;
-    void *buf_ptr;
+    void *xfer_buf;
+    size_t xfer_len;
 
     __attribute__((aligned(4))) msc_cbw_t cbw;
     __attribute__((aligned(4))) msc_csw_t csw;

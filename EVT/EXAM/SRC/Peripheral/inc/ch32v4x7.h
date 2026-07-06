@@ -31,7 +31,7 @@
 
 /* CH32V4x7 Standard Peripheral Library version number */
 #define __CH32V4x7_STDPERIPH_VERSION_MAIN   (0x01) /* [15:8] main version */
-#define __CH32V4x7_STDPERIPH_VERSION_SUB    (0x02) /* [7:0] sub version */
+#define __CH32V4x7_STDPERIPH_VERSION_SUB    (0x03) /* [7:0] sub version */
 #define __CH32V4x7_STDPERIPH_VERSION        ( (__CH32V4x7_STDPERIPH_VERSION_MAIN << 8)\
                                              |(__CH32V4x7_STDPERIPH_VERSION_SUB << 0))
 
@@ -5946,7 +5946,7 @@ typedef struct
 /*******************  Bit definition for LTDC_IER register  *******************/
 #define  LTDC_IER_LIE                                ((uint32_t)0x00000001)
 #define  LTDC_IER_FUIE                               ((uint32_t)0x00000002)
-
+#define  LTDC_IER_DMA_DISABLE                        ((uint32_t)0x00000004) /*(Only for chips with the fifth last digit of the batch number greater than zero)*/
 #define  LTDC_IER_RRIE                               ((uint32_t)0x00000008)
 
 /*******************  Bit definition for LTDC_ISR register  *******************/

@@ -1,11 +1,11 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : board.c
 * Author             : WCH
-* Version            : V1.0
-* Date               : 2026/02/09
+* Version            : V1.2
+* Date               : 2026/05/26
 * Description        : Board for ch32v407.
 *********************************************************************************
-* Copyright (c) 2025 Nanjing Qinheng Microelectronics Co., Ltd.
+* Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
@@ -20,7 +20,7 @@
 #include "usbhs1_dcp.h"
 #include "usbhs2_dcp.h"
 
-#include "device/usbd_driver.h"
+#include "usb_driver.h"
 
 /* @define */
 #define ROM_CFG_USERADR_ID              0x1FFFF7E8
@@ -74,17 +74,16 @@ void board_get_mac(uint8_t *mac)
  * @brief Board USB device initialization.
  *
  * @param index USB device index.
- * @param interrupt Interrupt enable flag.
  * @return usbd_handle_t* USB device handle.
  */
-usbd_handle_t *board_usbd_init(uint8_t index, usb_bool_t interrupt)
+usbd_handle_t *board_usbd_init(uint8_t index)
 {
     usb_rst_e rst;
 
     switch (index)
     {
     case 0:
-        rst = usbhs1_dch_init(interrupt);
+        rst = usbhs1_dch_init();
         if (rst == USB_RST_OK)
         {
             return &usbhs1d_handle;
@@ -92,7 +91,7 @@ usbd_handle_t *board_usbd_init(uint8_t index, usb_bool_t interrupt)
         break;
 
     case 1:
-        rst = usbhs2_dch_init(interrupt);
+        rst = usbhs2_dch_init();
         if (rst == USB_RST_OK)
         {
             return &usbhs2d_handle;

@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : usbhs_rndis.h
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2026/02/03
+* Version            : V1.0.1
+* Date               : 2026/07/01
 * Description        : usbhs_rndis program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -24,7 +24,7 @@
 #include "ch32v407_usbhs_device.h"
 
 #define RNDIS_MTU                   1500                           /* MTU value */
-#define RNDIS_LINK_SPEED            100000000                      /* Link baudrate (100Mbit/s for CH32V307-PHY) */
+#define RNDIS_LINK_SPEED            100000000                      /* Link baudrate */
 #define RNDID_LINKSPD_1000M         1000000000
 #define RNDID_LINKSPD_100M          100000000
 #define RNDID_LINKSPD_10M           10000000

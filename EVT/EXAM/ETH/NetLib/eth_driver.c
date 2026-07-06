@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : eth_driver.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2026/02/04
+* Version            : V1.0.1
+* Date               : 2026/07/01
 * Description        : eth program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -47,6 +47,7 @@ volatile uint32_t LocalTime;
 volatile uint8_t PhyWaitNegotiationSuc = 0;
 ETH_DMADESCTypeDef *pDMARxSet;
 ETH_DMADESCTypeDef *pDMATxSet;
+uint32_t ChipId;
 /*********************************************************************
  * @fn      WCHNET_GetMacAddr
  *
@@ -244,11 +245,15 @@ void ETH_LedLinkSet( uint8_t mode )
 {
     if( mode == LED_OFF )
     {
-        GPIO_ResetBits(GPIOD, GPIO_Pin_15);
+        if((ChipId == 2) || (ChipId == 5))
+            GPIO_ResetBits(GPIOD, GPIO_Pin_15);
+        else GPIO_ResetBits(GPIOE, GPIO_Pin_9);
     }
     else
     {
-        GPIO_SetBits(GPIOD, GPIO_Pin_15);
+        if((ChipId == 2) || (ChipId == 5))
+            GPIO_SetBits(GPIOD, GPIO_Pin_15);
+        else GPIO_SetBits(GPIOE, GPIO_Pin_9);
     }
 }
 
@@ -263,11 +268,15 @@ void ETH_LedDataSet( uint8_t mode )
 {
     if( mode == LED_OFF )
     {
-        GPIO_ResetBits(GPIOD, GPIO_Pin_14);
+        if((ChipId == 2) || (ChipId == 5))
+            GPIO_ResetBits(GPIOD, GPIO_Pin_14);
+        else GPIO_ResetBits(GPIOE, GPIO_Pin_8);
     }
     else
     {
-        GPIO_SetBits(GPIOD, GPIO_Pin_14);
+        if((ChipId == 2) || (ChipId == 5))
+            GPIO_SetBits(GPIOD, GPIO_Pin_14);
+        else GPIO_SetBits(GPIOE, GPIO_Pin_8);
     }
 }
 
@@ -286,38 +295,76 @@ void PHY_LEDCfg(void)
     uint16_t RegValue;
     GPIO_InitTypeDef GPIO_InitStructure = {0};
 
-    if((FEATURE_SIGN & 0x01) == 0)
+    if(((*(uint32_t *)FEATURE_SIGN) & 0x01) == 0)
     {
-        RCC_PB2PeriphClockCmd(RCC_PB2Periph_GPIOD, ENABLE);
+        if((ChipId == 2) || (ChipId == 5))
+        {
+            RCC_PB2PeriphClockCmd(RCC_PB2Periph_GPIOD, ENABLE);
 
-        GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14;
-        GPIO_InitStructure.GPIO_Speed = GPIO_Speed_High;
-        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-        GPIO_Init(GPIOD, &GPIO_InitStructure);
-        GPIO_ResetBits(GPIOD, GPIO_Pin_14);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14;
+            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_High;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+            GPIO_Init(GPIOD, &GPIO_InitStructure);
+            GPIO_ResetBits(GPIOD, GPIO_Pin_14);
 
-        GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
-        GPIO_InitStructure.GPIO_Speed = GPIO_Speed_High;
-        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-        GPIO_Init(GPIOD, &GPIO_InitStructure);
-        GPIO_ResetBits(GPIOD, GPIO_Pin_15);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
+            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_High;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+            GPIO_Init(GPIOD, &GPIO_InitStructure);
+            GPIO_ResetBits(GPIOD, GPIO_Pin_15);
+        }
+        else
+        {
+            RCC_PB2PeriphClockCmd(RCC_PB2Periph_GPIOE, ENABLE);
+
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_High;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+            GPIO_Init(GPIOE, &GPIO_InitStructure);
+            GPIO_ResetBits(GPIOE, GPIO_Pin_8);
+
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_High;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+            GPIO_Init(GPIOE, &GPIO_InitStructure);
+            GPIO_ResetBits(GPIOE, GPIO_Pin_9);
+        }
     }
     else
     {
-        RCC_PB2PeriphClockCmd(RCC_PB2Periph_AFIO | RCC_PB2Periph_GPIOD, ENABLE);
-        AFIO->PCFR1 |= 1<<31;
+        if((ChipId == 2) || (ChipId == 5))
+        {
+            RCC_PB2PeriphClockCmd(RCC_PB2Periph_AFIO | RCC_PB2Periph_GPIOD, ENABLE);
+            AFIO->PCFR1 |= 1<<31;
 
-        GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14;
-        GPIO_InitStructure.GPIO_Speed = GPIO_Speed_High;
-        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-        GPIO_Init(GPIOD, &GPIO_InitStructure);
-        GPIO_ResetBits(GPIOD, GPIO_Pin_14);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14;
+            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_High;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+            GPIO_Init(GPIOD, &GPIO_InitStructure);
+            GPIO_ResetBits(GPIOD, GPIO_Pin_14);
 
-        GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
-        GPIO_InitStructure.GPIO_Speed = GPIO_Speed_High;
-        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-        GPIO_Init(GPIOD, &GPIO_InitStructure);
-        GPIO_ResetBits(GPIOD, GPIO_Pin_15);
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
+            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_High;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+            GPIO_Init(GPIOD, &GPIO_InitStructure);
+            GPIO_ResetBits(GPIOD, GPIO_Pin_15);
+        }
+        else
+        {
+            RCC_PB2PeriphClockCmd(RCC_PB2Periph_AFIO | RCC_PB2Periph_GPIOE, ENABLE);
+
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_High;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+            GPIO_Init(GPIOE, &GPIO_InitStructure);
+            GPIO_ResetBits(GPIOE, GPIO_Pin_8);
+
+            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_High;
+            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+            GPIO_Init(GPIOE, &GPIO_InitStructure);
+            GPIO_ResetBits(GPIOE, GPIO_Pin_9);
+        }
 
         ETH_WritePHYRegister(gPHYAddress, PHY_PAG_SEL, PHY_REG_PAGE7 );
 
@@ -422,7 +469,7 @@ uint32_t ETH_RegInit( ETH_InitTypeDef* ETH_InitStruct, uint16_t PHYAddress )
  */
 void ETH_Configuration( uint8_t *macAddr )
 {
-    ETH_InitTypeDef ETH_InitStructure;
+    ETH_InitTypeDef ETH_InitStructure = {0};
     uint16_t timeout = 10000;
 
     gPHYAddress = PHY_ADDRESS;
@@ -634,6 +681,7 @@ uint8_t ETH_LibInit( uint8_t *ip, uint8_t *gwip, uint8_t *mask, uint8_t *macaddr
     uint8_t s;
     struct _WCH_CFG  cfg;
 
+    ChipId = (DBGMCU_GetCHIPID() >> 16) & 0xf;
     memset(&cfg,0,sizeof(cfg));
     cfg.TxBufSize = ETH_TX_BUF_SZE;
     cfg.TCPMss   = WCHNET_TCP_MSS;
@@ -641,7 +689,7 @@ uint8_t ETH_LibInit( uint8_t *ip, uint8_t *gwip, uint8_t *mask, uint8_t *macaddr
     cfg.ARPTableNum = WCHNET_NUM_ARP_TABLE;
     cfg.MiscConfig0 = WCHNET_MISC_CONFIG0;
     cfg.MiscConfig1 = WCHNET_MISC_CONFIG1;
-    if((FEATURE_SIGN & 0x01) == 0)
+    if(((*(uint32_t *)FEATURE_SIGN) & 0x01) == 0)
     {
         cfg.led_link = ETH_LedLinkSet;
         cfg.led_data = ETH_LedDataSet;

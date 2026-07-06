@@ -1,11 +1,11 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : descriptor.h
 * Author             : WCH
-* Version            : V1.0
-* Date               : 2025/11/01
+* Version            : V1.2
+* Date               : 2026/05/26
 * Description        : Usb descriptor.
 *********************************************************************************
-* Copyright (c) 2025 Nanjing Qinheng Microelectronics Co., Ltd.
+* Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
@@ -20,7 +20,7 @@ extern "C" {
 /* @include */
 #include <stdint.h>
 
-#include "device/usbd_driver.h"
+#include "usb_driver.h"
 
 /* @define */
 #define CONFIG_DESC_SIZE                    67

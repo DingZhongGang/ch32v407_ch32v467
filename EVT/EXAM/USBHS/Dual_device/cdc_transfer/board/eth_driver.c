@@ -1,12 +1,12 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : eth_driver.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2026/02/04
+* Version            : V1.0.3
+* Date               : 2026/07/01
 * Description        : eth program body.
 *********************************************************************************
-* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* Attention: This software (modified or not) and binary are used for 
+* Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
@@ -368,7 +368,7 @@ uint32_t ETH_RegInit( ETH_InitTypeDef* ETH_InitStruct, uint16_t PHYAddress )
  */
 void ETH_Configuration( uint8_t *macAddr )
 {
-    ETH_InitTypeDef ETH_InitStructure;
+    ETH_InitTypeDef ETH_InitStructure = {0};
     uint16_t timeout = 10000;
 
     gPHYAddress = PHY_ADDRESS;

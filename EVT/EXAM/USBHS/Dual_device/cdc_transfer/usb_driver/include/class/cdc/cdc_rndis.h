@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : cdc_rndis.h
 * Author             : WCH
-* Version            : V1.0
-* Date               : 2026/01/29
+* Version            : V1.2
+* Date               : 2026/05/26
 * Description        : CDC RNDIS class define.
 *********************************************************************************
 * Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.

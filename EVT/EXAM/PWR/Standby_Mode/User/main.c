@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/06/06
+* Version            : V1.0.1
+* Date               : 2026/06/26
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -18,7 +18,7 @@
  *the WKUP (PA0) pin exits the standby mode,Program reset after wake-up.
  *For the small package model of the chip, there are some pins that have not been 
  *led out compared to the largest package, or some pins that have been packaged but 
- *not used. These pins need to be set as anolog input to reduce current consumption. 
+ *not used. 
  */
 
 #include "debug.h"
@@ -30,8 +30,8 @@
 /*********************************************************************
  * @fn      All_GPIO_AIN_Init
  *
- * @brief   Before entering standby mode, all I/O pins not used for wake-up functions 
- *          shall be configured to analog input mode.
+ * @brief   All I/O pins are configured as analog input mode. 
+ *          
  * @return  none
  */
 void All_GPIO_AIN_Init(void)

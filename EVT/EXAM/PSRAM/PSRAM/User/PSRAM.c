@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT  *******************************
 * File Name          : ch32v4x7_psram.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/12/01
+* Version            : V1.0.1
+* Date               : 2026/06/30
 * Description        : This file provides all the PSRAM firmware functions.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -43,7 +43,7 @@ void Wait_Busy_0()
  *          Data -  data
  * @return  none
 */
-void PSRAMWriteReg(uint32_t Addr, uint32_t Data)
+void PSRAMWriteReg(uint32_t Addr, uint16_t Data)
 {
     Wait_Busy_0();
     PSRAMSetData(Data);

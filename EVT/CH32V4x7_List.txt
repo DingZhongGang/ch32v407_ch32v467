@@ -1,5 +1,5 @@
 
-南京沁恒微电子股份有限公司 2026.05
+南京沁恒微电子股份有限公司 2026.07
 最新资料请到我们的网站上查询
 https://wch.cn
 
@@ -146,9 +146,7 @@ https://wch.cn
   |      |      |      |      |-- RTC_Calibration：RTC校准例程  
   |      |      |      |-- SDIO
   |      |      |      |      |-- SDIO_SD：SDIO操作SD卡例程
-  |      |      |      |      |-- SDIO_SD_FATFS：FATFS文件系统（SD卡）例程
   |      |      |      |      |-- SDIO_EMMC：SDIO操作eMMC卡例程
-  |      |      |      |      |-- SDIO_Mode：SDIO 主机/从机 模式收发例程
   |      |      |      |-- SPI
   |      |      |      |      |-- 1Lines_half-duplex：单线半双工模式，Master/Slave 模式数据收发
   |      |      |      |      |-- 2Lines_FullDuplex：双线全双工模式，Master/Slave 模式数据收发

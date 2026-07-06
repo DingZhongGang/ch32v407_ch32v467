@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT  *******************************
 * File Name          : ch32v4x7_psram.h
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/12/01
+* Version            : V1.0.1
+* Date               : 2026/07/01
 * Description        : This file contains all the functions prototypes for the PSRAM
 *                      firmware library.
 *********************************************************************************
@@ -14,6 +14,11 @@
 #include "ch32v4x7.h"
 
 
+#define Memory32Mb 0  
+#define Memory64Mb 1
+ 
+#define PSRAM_Memory       Memory32Mb      //CH32V467RET
+// #define PSRAM_Memory        Memory64Mb   //CH32V467VET6 CH32V467WEU
 
 /*PSRAM Rst CMD */
 #define CMD_MR_RESET          ((uint32_t)(PSRAM->CMD1_CFG>>16)&0xFF)
@@ -87,7 +92,7 @@
 
 
 
-void WriteReg(uint32_t Addr, uint32_t Data);
+void PSRAMWriteReg(uint32_t Addr, uint16_t Data);
 uint32_t ReadReg(uint32_t Addr);
 void SetWrLatency(uint32_t PSRAM_Fre, uint32_t Write_Latency);
 void SetRdLatency(uint32_t PSRAM_Fre, uint32_t Read_Latency,uint32_t Read_Latency_Type);

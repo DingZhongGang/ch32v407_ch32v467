@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/12/01
+* Version            : V1.0.1
+* Date               : 2026/07/01
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -109,7 +109,7 @@ int main(void)
 			case 11:LCD_Clear(BROWN);break;
 		}
 		POINT_COLOR=RED;	  
-		LCD_ShowString(30,40,210,24,24,"CH32V307");
+		LCD_ShowString(30,40,210,24,24,"CH32V4X7");
 		LCD_ShowString(30,70,200,16,16,"TFTLCD TEST");
 		LCD_ShowString(30,90,200,16,16,"WCH");
 	    x++;

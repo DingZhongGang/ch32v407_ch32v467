@@ -1,11 +1,11 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : led.h
 * Author             : WCH
-* Version            : V1.0
-* Date               : 2026/02/09
+* Version            : V1.2
+* Date               : 2026/05/26
 * Description        : Led driver for ch32v407.
 *********************************************************************************
-* Copyright (c) 2025 Nanjing Qinheng Microelectronics Co., Ltd.
+* Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
@@ -20,7 +20,7 @@ extern "C" {
 /* @include */
 #include <stdint.h>
 
-#include "usb_define.h"
+#include "usb_driver.h"
 
 /* @function declaration */
 usb_rst_e led_init(void);

@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : sdio.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/12/01
+* Version            : V1.0.1
+* Date               : 2026/07/01
 * Description        : This file contains the headers of the SDIO.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -48,7 +48,7 @@ __attribute__( ( aligned( 4 ) ) ) u8 SDIO_DATA_BUFFER[512];
  */
 SD_Error SD_Init( void )
 {
-    GPIO_InitTypeDef  GPIO_InitStructure;
+    GPIO_InitTypeDef  GPIO_InitStructure = {0};
 
     u8 clkdiv = 3;
     SD_Error errorstatus = SD_OK;
@@ -1997,7 +1997,7 @@ u8 convert_from_bytes_to_power_of_two( u16 NumberOfBytes )
  */
 void SD_DMA_Config( u32 *mbuf, u32 bufsize, u32 DMA_DIR )
 {
-    DMA_InitTypeDef DMA_InitStructure;
+    DMA_InitTypeDef DMA_InitStructure = {0};
 
     RCC_HBPeriphClockCmd( RCC_HBPeriph_DMA2, ENABLE );
 
