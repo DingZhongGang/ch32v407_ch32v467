@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : ch32v407_usbhs_device.c
  * Author             : WCH
- * Version            : V1.0.2
- * Date               : 2026/05/20
+ * Version            : V1.0.3
+ * Date               : 2026/07/01
  * Description        : This file provides all the USBHS firmware functions.
  *********************************************************************************
  * Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -74,7 +74,7 @@ void USB_TestMode_Deal(void)
 #if TEST_ENABLE == 0x01
     /* start test */
     USBHS_Test_Flag &= ~0x80;
-
+    *(volatile uint32_t *)0x40022048 &= ~0x000C0003;
     if(USBHS_SetupReqIndex == 0x0100)
     {
         /* Test_J */
@@ -119,8 +119,8 @@ void USBHS_Device_Endp_Init(void)
     USBHSD->UEP_TX_EN = USBHS_UEP0_T_EN | USBHS_UEP1_T_EN | USBHS_UEP4_T_EN | USBHS_UEP6_T_EN;
     USBHSD->UEP_RX_EN = USBHS_UEP0_R_EN | USBHS_UEP1_R_EN | USBHS_UEP3_R_EN | USBHS_UEP5_R_EN;
 
-    USBHSD->UEP_TX_TOG_AUTO = USBHS_UEP1_T_EN | USBHS_UEP4_T_EN | USBHS_UEP6_T_EN;
-    USBHSD->UEP_RX_TOG_AUTO = USBHS_UEP1_R_EN | USBHS_UEP3_R_EN | USBHS_UEP5_R_EN;
+    USBHSD->UEP_TX_TOG_AUTO = 0;
+    USBHSD->UEP_RX_TOG_AUTO = 0;
 
     USBHSD->UEP0_MAX_LEN = DEF_USBD_UEP0_SIZE;
     USBHSD->UEP1_MAX_LEN = DEF_USB_EP1_HS_SIZE;
@@ -156,6 +156,9 @@ void USBHS_Device_Endp_Init(void)
 
     USBHSD->UEP6_TX_LEN = 0;
     USBHSD->UEP6_TX_CTRL = USBHS_UEP_T_RES_NAK;
+
+    USBHSD->UEP_TX_TOG_AUTO = USBHS_UEP1_T_EN | USBHS_UEP4_T_EN | USBHS_UEP6_T_EN;
+    USBHSD->UEP_RX_TOG_AUTO = USBHS_UEP1_R_EN | USBHS_UEP3_R_EN | USBHS_UEP5_R_EN;
 }
 
 /*********************************************************************
@@ -237,7 +240,7 @@ void USBHS_Device_Init(FunctionalState sta)
 void USBHS_IRQHandler(void)
 {
     uint8_t intflag, intst, errflag;
-    uint16_t len, i;
+    uint16_t len, i, tx_atog, rx_atog;
     uint8_t endp_num;
 
     intflag = USBHSD->INT_FG;
@@ -437,6 +440,11 @@ void USBHS_IRQHandler(void)
                                 /* Set End-point Feature */
                                 if((uint8_t)(USBHS_SetupReqValue & 0xFF) == USB_REQ_FEAT_ENDP_HALT)
                                 {
+                                    tx_atog = USBHSD->UEP_TX_TOG_AUTO;
+                                    rx_atog = USBHSD->UEP_RX_TOG_AUTO;
+                                    USBHSD->UEP_TX_TOG_AUTO = 0;
+                                    USBHSD->UEP_RX_TOG_AUTO = 0;
+
                                     /* Clear End-point Feature */
                                     switch((uint8_t)(USBHS_SetupReqIndex & 0xFF))
                                     {
@@ -474,6 +482,8 @@ void USBHS_IRQHandler(void)
                                         errflag = 0xFF;
                                         break;
                                     }
+                                    USBHSD->UEP_TX_TOG_AUTO = tx_atog;
+                                    USBHSD->UEP_RX_TOG_AUTO = rx_atog;
                                 }
                                 else
                                 {

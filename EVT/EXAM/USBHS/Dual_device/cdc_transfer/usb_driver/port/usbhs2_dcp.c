@@ -1,11 +1,11 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : usbhs2_dcp.c
 * Author             : WCH
-* Version            : V1.0
-* Date               : 2026/02/09
+* Version            : V1.2
+* Date               : 2026/05/26
 * Description        : Usb high speed device controller 2 port for ch32v407.
 *********************************************************************************
-* Copyright (c) 2025 Nanjing Qinheng Microelectronics Co., Ltd.
+* Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
@@ -18,11 +18,13 @@
 #include "ch32v4x7_usb.h"
 
 #include "usbhs2_dcp.h"
+#include "device/usbd_driver_private.h"
 
 /* @define */
 #define ENDP_MAX_LEN(ep)                *((volatile uint32_t *)&(USBHS2D->UEP0_MAX_LEN) + (ep))
 #define ENDP_TX_LEN(ep)                 *((volatile uint16_t *)&(USBHS2D->UEP0_TX_LEN) + (ep) * 2)
 #define ENDP_RX_LEN(ep)                 *((volatile uint16_t *)&(USBHS2D->UEP0_RX_LEN) + (ep) * 2)
+#define ENDP_RX_SIZE(ep)                *((volatile uint16_t *)&(USBHS2D->UEP1_RX_SIZE) + (ep - 1) * 2)
 #define ENDP_TX_CTRL(ep)                *((volatile uint8_t *)&(USBHS2D->UEP0_TX_CTRL) + (ep) * 4)
 #define ENDP_RX_CTRL(ep)                *((volatile uint8_t *)&(USBHS2D->UEP0_RX_CTRL) + (ep) * 4)
 #define ENDP_TX_DMA_ADDR(ep)            *((volatile uint32_t *)&(USBHS2D->UEP1_TX_DMA) + (ep - 1))
@@ -30,40 +32,40 @@
 
 /* @global */
 usbd_handle_t usbhs2d_handle;
-static usb_bool_t _interrupt = USB_FALSE;
+static uint16_t _endp_tx_size[USBHS2_DCP_MAX_ENDPOINTS];
 
 /* @function declaration */
 static usb_rst_e _enable(void);
 static usb_rst_e _disable(void);
-static usb_rst_e _open(void);
+static usb_rst_e _open(usb_speed_e speed, usb_bool_t sof_en);
 static usb_rst_e _close(void);
 static usb_rst_e _get_event(usbd_event_t *e);
 static usb_rst_e _clear_event(usbd_event_t *e);
 static usb_rst_e _resume(void);
 static usb_rst_e _set_address(uint8_t addr);
 static usb_rst_e _interrupt_ctrl(usb_bool_t status);
-static usb_rst_e _endp_open(usb_endp_t ep, endp_type_e type);
+static usb_rst_e _test_mode_ctrl(usb_req_test_select_e test_select);
+static usb_rst_e _endp_open(usb_endp_t ep, uint8_t feature, uint16_t max_size);
 static usb_rst_e _endp_close(usb_endp_t ep);
-static usb_rst_e _set_endp_status(usb_endp_t ep, endp_resp_e resp, endp_tog_e tog);
+static usb_rst_e _set_endp_buf(usb_endp_t ep, void *buf);
 static usb_rst_e _set_endp_size(usb_endp_t ep, size_t size);
-static usb_rst_e _set_endp_buf(usb_endp_t ep, const void *buf);
-static usb_rst_e _set_endp_burst_size(usb_endp_t ep, size_t size);
-static usb_rst_e _get_endp_status(usb_endp_t ep, endp_resp_e *resp, endp_tog_e *tog);
-static usb_rst_e _get_endp_size(usb_endp_t ep, size_t *size);
+static usb_rst_e _set_endp_toggle(usb_endp_t ep, endp_tog_e tog);
+static usb_rst_e _set_endp_response(usb_endp_t ep, endp_resp_e resp);
 static usb_rst_e _get_endp_buf(usb_endp_t ep, void **buf);
-static usb_rst_e _get_endp_burst_size(usb_endp_t ep, size_t *size);
+static usb_rst_e _get_endp_size(usb_endp_t ep, size_t *size);
+static usb_rst_e _get_endp_toggle(usb_endp_t ep, endp_tog_e *tog);
+static usb_rst_e _get_endp_response(usb_endp_t ep, endp_resp_e *resp);
 
 __attribute__((interrupt("WCH-Interrupt-fast"))) void USBHS2_IRQHandler(void)
 {
     usbd_drv_task(&usbhs2d_handle);
 }
 
-usb_rst_e usbhs2_dch_init(usb_bool_t interrupt)
+usb_rst_e usbhs2_dch_init(void)
 {
-    _interrupt = interrupt;
     memset(&usbhs2d_handle, 0, sizeof(usbhs2d_handle));
+    memset(_endp_tx_size, 0, sizeof(_endp_tx_size));
 
-    usbhs2d_handle.feature.burst_support = USB_TRUE;
     usbhs2d_handle.feature.ep0_size = USBHS2_DCP_ENDP0_SIZE;
 
     usbhs2d_handle.enable = _enable;
@@ -75,16 +77,17 @@ usb_rst_e usbhs2_dch_init(usb_bool_t interrupt)
     usbhs2d_handle.resume = _resume;
     usbhs2d_handle.set_address = _set_address;
     usbhs2d_handle.interrupt_ctrl = _interrupt_ctrl;
+    usbhs2d_handle.test_mode_ctrl = _test_mode_ctrl;
     usbhs2d_handle.endp_open = _endp_open;
     usbhs2d_handle.endp_close = _endp_close;
-    usbhs2d_handle.set_endp_status = _set_endp_status;
-    usbhs2d_handle.set_endp_size = _set_endp_size;
     usbhs2d_handle.set_endp_buf = _set_endp_buf;
-    usbhs2d_handle.set_endp_burst_size = _set_endp_burst_size;
-    usbhs2d_handle.get_endp_status = _get_endp_status;
-    usbhs2d_handle.get_endp_size = _get_endp_size;
+    usbhs2d_handle.set_endp_size = _set_endp_size;
+    usbhs2d_handle.set_endp_toggle = _set_endp_toggle;
+    usbhs2d_handle.set_endp_response = _set_endp_response;
     usbhs2d_handle.get_endp_buf = _get_endp_buf;
-    usbhs2d_handle.get_endp_burst_size = _get_endp_burst_size;
+    usbhs2d_handle.get_endp_size = _get_endp_size;
+    usbhs2d_handle.get_endp_toggle = _get_endp_toggle;
+    usbhs2d_handle.get_endp_response = _get_endp_response;
 
     return USB_RST_OK;
 }
@@ -120,33 +123,28 @@ static usb_rst_e _enable(void)
                       USBHS_UDIE_TRANSFER | USBHS_UDIE_LINK_RDY;
     USBHS2D->UEP_TX_EN = 0;
     USBHS2D->UEP_RX_EN = 0;
-    USBHS2D->BASE_MODE = USBHS_UD_SPEED_HIGH;
     USBHS2D->CONTROL = USBHS_UD_DMA_EN | USBHS_UD_LPM_EN | USBHS_UD_PHY_SUSPENDM;
-    NVIC_EnableIRQ(USBHS2_IRQn);
 
-    if (_interrupt)
-    {
-        NVIC_EnableIRQ(USBHS2_IRQn);
-    }
+    NVIC_EnableIRQ(USBHS2_IRQn);
 
     return USB_RST_OK;
 }
 
 static usb_rst_e _disable(void)
 {
-    if (_interrupt)
-    {
-        NVIC_DisableIRQ(USBHS2_IRQn);
-    }
-
+    NVIC_DisableIRQ(USBHS2_IRQn);
     RCC_HBPeriphClockCmd(RCC_HBPeriph_USBHS2, DISABLE);
     RCC_UTMI2cmd(DISABLE);
     RCC->CTLR &= ~RCC_USBHSPLLON;
     return USB_RST_OK;
 }
 
-static usb_rst_e _open(void)
+static usb_rst_e _open(usb_speed_e speed, usb_bool_t sof_en)
 {
+    uint8_t speed_val[] = {USBHS_UD_SPEED_FULL, USBHS_UD_SPEED_LOW, USBHS_UD_SPEED_HIGH, USBHS_UD_SPEED_HIGH};
+
+    USBHS2D->INT_EN = sof_en ? USBHS2D->INT_EN | USBHS_UDIE_SOF_ACT : USBHS2D->INT_EN & ~USBHS_UDIE_SOF_ACT;
+    USBHS2D->BASE_MODE = (USBHS2D->BASE_MODE & ~USBHS_UD_SPEED_TYPE) | speed_val[speed];
     USBHS2D->CONTROL |= USBHS_UD_DEV_EN;
     return USB_RST_OK;
 }
@@ -171,13 +169,23 @@ static usb_rst_e _get_event(usbd_event_t *e)
         if (endp == 0x00 && !dir && (ENDP_RX_CTRL(0) & USBHS_UEP_R_SETUP_IS))
         {
             e->e = USBD_EVENT_SETUP;
+            ENDP_TX_CTRL(0) = (ENDP_TX_CTRL(0) & ~USBHS_UEP_T_TOG_MASK) | USBHS_UEP_T_TOG_DATA1;
+            ENDP_RX_CTRL(0) = (ENDP_RX_CTRL(0) & ~USBHS_UEP_R_TOG_MASK) | USBHS_UEP_R_TOG_DATA1;
         }
         else if (dir)
         {
             e->e = USBD_EVENT_XFER;
             e->xfer.ep = endp | 0x80;
-            e->xfer.size = ENDP_TX_LEN(endp);
-            e->xfer.buf = (endp == 0x00) ? (void *)USBHS2D->UEP0_DMA : (void *)ENDP_TX_DMA_ADDR(endp);
+            e->xfer.size = _endp_tx_size[endp];
+            if (endp == 0)
+            {
+                e->xfer.buf = (void *)USBHS2D->UEP0_DMA;
+                ENDP_TX_CTRL(0) ^= USBHS_UEP_T_TOG_DATA1;
+            }
+            else
+            {
+                e->xfer.buf = (void *)ENDP_TX_DMA_ADDR(endp);
+            }
         }
         else if (ENDP_RX_CTRL(endp) & USBHS_UEP_R_TOG_MATCH)
         {
@@ -185,7 +193,15 @@ static usb_rst_e _get_event(usbd_event_t *e)
             e->xfer.ep = endp & ~0x80;
             e->xfer.size = ENDP_RX_LEN(endp);
             ENDP_RX_LEN(endp) = 0;
-            e->xfer.buf = (endp == 0x00) ? (void *)USBHS2D->UEP0_DMA : (void *)ENDP_RX_DMA_ADDR(endp);
+            if (endp == 0)
+            {
+                e->xfer.buf = (void *)USBHS2D->UEP0_DMA;
+                ENDP_RX_CTRL(0) ^= USBHS_UEP_R_TOG_DATA1;
+            }
+            else
+            {
+                e->xfer.buf = (void *)ENDP_RX_DMA_ADDR(endp);
+            }
         }
         else
         {
@@ -196,13 +212,24 @@ static usb_rst_e _get_event(usbd_event_t *e)
     else if (en & flag & USBHS_UDIF_RX_SOF)
     {
         e->e = USBD_EVENT_SOF;
-        e->sof.frame_no = USBHS2D->FRAME_NO & 0x07FF;
+        uint16_t frame_no = USBHS2D->FRAME_NO;
+        e->sof.frame_no = frame_no & 0x07FF;
+        e->sof.microframe_no = frame_no >> 13;
     }
     else if (flag & USBHS_UDIF_BUS_RST)
     {
         e->e = USBD_EVENT_RESET;
         Delay_Ms(10);
-        e->reset.link_speed = (USBHS2D->MIS_ST & USBHS_UDMS_HS_MOD) ? USB_SPEED_HIGH : USB_SPEED_FULL;
+        usb_speed_e link_speed = USB_SPEED_FULL;
+        if (USBHS2D->MIS_ST & USBHS_UDMS_HS_MOD)
+        {
+            link_speed = USB_SPEED_HIGH;
+        }
+        else if ((USBHS2D->BASE_MODE & USBHS_UD_SPEED_TYPE) == USBHS_UD_SPEED_LOW)
+        {
+            link_speed = USB_SPEED_LOW;
+        }
+        e->reset.link_speed = link_speed;
     }
     else if (flag & USBHS_UDIF_SUSPEND)
     {
@@ -244,7 +271,7 @@ static usb_rst_e _clear_event(usbd_event_t *e)
         break;
 
     case USBD_EVENT_XFER:
-        if (e->xfer.ep & 0x80)
+        if (ENDP_DIR(e->xfer.ep))
         {
             ENDP_TX_CTRL(ENDP_NUM(e->xfer.ep)) &= ~USBHS_UEP_T_DONE;
         }
@@ -275,8 +302,6 @@ static usb_rst_e _set_address(uint8_t addr)
 
 static usb_rst_e _interrupt_ctrl(usb_bool_t status)
 {
-    if (_interrupt == USB_FALSE) return USB_RST_OK;
-
     if (status == USB_TRUE)
     {
         NVIC_EnableIRQ(USBHS2_IRQn);
@@ -290,7 +315,51 @@ static usb_rst_e _interrupt_ctrl(usb_bool_t status)
     return USB_RST_OK;
 }
 
-static usb_rst_e _endp_open(usb_endp_t ep, endp_type_e type)
+static usb_rst_e _test_mode_ctrl(usb_req_test_select_e test_select)
+{
+#define TEST_MASK           0x0F
+
+    __attribute__((aligned(4))) static uint8_t test_packet_buf[] =
+    {
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA,
+        0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE,
+        0xFE, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+        0xFF, 0xFF, 0xFF, 0xFF, 0x7F, 0xBF, 0xDF, 0xEF,
+        0xF7, 0xFB, 0xFD, 0xFC, 0x7E, 0xBF, 0xDF, 0xEF, 0xF7, 0xFB, 0xFD, 0x7E,
+    };
+
+    switch (test_select)
+    {
+    case USB_REQ_TEST_SELECT_J:
+        USBHS2D->TEST_MODE = USBHS2D->TEST_MODE & ~TEST_MASK | USBHS_UD_TEST_J;
+        return USB_RST_OK;
+
+    case USB_REQ_TEST_SELECT_K:
+        USBHS2D->TEST_MODE = USBHS2D->TEST_MODE & ~TEST_MASK | USBHS_UD_TEST_K;
+
+        return USB_RST_OK;
+
+    case USB_REQ_TEST_SELECT_SE0_NAK:
+        USBHS2D->TEST_MODE = USBHS2D->TEST_MODE & ~TEST_MASK | USBHS_UD_TEST_SE0NAK;
+        return USB_RST_OK;
+
+    case USB_REQ_TEST_SELECT_PACKET:
+        USBHS2D->TEST_MODE &= ~TEST_MASK;
+        USBHS2D->UEP4_TX_DMA = (uint32_t)test_packet_buf;
+        USBHS2D->UEP4_TX_LEN = sizeof(test_packet_buf);
+        USBHS2D->UEP4_TX_CTRL = USBHS_UEP_T_RES_ACK;
+        USBHS2D->TEST_MODE |= USBHS_UD_TEST_PKT;
+        return USB_RST_OK;
+
+    default:
+        return USB_RST_FAILED;
+    }
+
+    return USB_RST_OK;
+}
+
+static usb_rst_e _endp_open(usb_endp_t ep, uint8_t feature, uint16_t max_size)
 {
     uint8_t dir = ENDP_DIR(ep);
     uint8_t num = ENDP_NUM(ep);
@@ -303,50 +372,70 @@ static usb_rst_e _endp_open(usb_endp_t ep, endp_type_e type)
     {
         USBHS2D->UEP_TX_EN |= bit;
 
-        switch (type)
+        if (feature & USBD_ENDP_FEATURE_ISO)
         {
-        case ENDP_TYPE_NORMAL:
-            USBHS2D->UEP_TX_ISO &= ~bit;
-            USBHS2D->UEP_TX_BURST &= ~bit;
-            USBHS2D->UEP_TX_TOG_AUTO &= ~bit;
-            break;
-
-        case ENDP_TYPE_ISO:
             USBHS2D->UEP_TX_ISO |= bit;
-            USBHS2D->UEP_TX_BURST &= ~bit;
             USBHS2D->UEP_TX_TOG_AUTO &= ~bit;
-            break;
-
-        case ENDP_TYPE_BURST:
+        }
+        else
+        {
             USBHS2D->UEP_TX_ISO &= ~bit;
-            USBHS2D->UEP_TX_BURST |= bit;
             USBHS2D->UEP_TX_TOG_AUTO |= bit;
-            break;
+        }
+
+        if (feature & USBD_ENDP_FEATURE_BURST)
+        {
+            ENDP_MAX_LEN(num) = max_size;
+            USBHS2D->UEP_TX_BURST |= bit;
+            usbhs2d_handle.endp_params[USB_DIR_IN][num].feature |= USBD_ENDP_FEATURE_BURST;
+        }
+        else
+        {
+            USBHS2D->UEP_TX_BURST &= ~bit;
+        }
+
+        if (feature & USBD_ENDP_FEATURE_ZLP)
+        {
+            USBHS2D->UEP_TX_BURST_MODE &= ~bit;
+            usbhs2d_handle.endp_params[USB_DIR_IN][num].feature &= ~USBD_ENDP_FEATURE_ZLP;
+        }
+        else
+        {
+            USBHS2D->UEP_TX_BURST_MODE |= bit;
         }
     }
     else
     {
         USBHS2D->UEP_RX_EN |= bit;
+        ENDP_MAX_LEN(num) = max_size;
 
-        switch (type)
+        if (num > 0)
         {
-        case ENDP_TYPE_NORMAL:
-            USBHS2D->UEP_RX_ISO &= ~bit;
-            USBHS2D->UEP_RX_BURST &= ~bit;
-            USBHS2D->UEP_RX_TOG_AUTO &= ~bit;
-            break;
+            ENDP_RX_SIZE(num) = max_size;
+        }
 
-        case ENDP_TYPE_ISO:
+        if (feature & USBD_ENDP_FEATURE_ISO)
+        {
             USBHS2D->UEP_RX_ISO |= bit;
-            USBHS2D->UEP_RX_BURST &= ~bit;
             USBHS2D->UEP_RX_TOG_AUTO &= ~bit;
-            break;
-
-        case ENDP_TYPE_BURST:
+        }
+        else
+        {
             USBHS2D->UEP_RX_ISO &= ~bit;
-            USBHS2D->UEP_RX_BURST |= bit;
             USBHS2D->UEP_RX_TOG_AUTO |= bit;
-            break;
+        }
+
+        if (feature & USBD_ENDP_FEATURE_BURST)
+        {
+            ENDP_RX_LEN(num) = 0;
+            USBHS2D->UEP_RX_BURST |= bit;
+            USBHS2D->UEP_RX_RES_MODE |= bit;
+            usbhs2d_handle.endp_params[USB_DIR_OUT][num].feature |= USBD_ENDP_FEATURE_BURST;
+        }
+        else
+        {
+            USBHS2D->UEP_RX_BURST &= ~bit;
+            USBHS2D->UEP_RX_RES_MODE &= ~bit;
         }
     }
 
@@ -366,48 +455,23 @@ static usb_rst_e _endp_close(usb_endp_t ep)
     {
         USBHS2D->UEP_TX_EN &= ~bit;
         USBHS2D->UEP_TX_ISO &= ~bit;
+        USBHS2D->UEP_TX_BURST &= ~bit;
+        USBHS2D->UEP_TX_TOG_AUTO &= ~bit;
+        USBHS2D->UEP_TX_BURST_MODE &= ~bit;
     }
     else
     {
         USBHS2D->UEP_RX_EN &= ~bit;
         USBHS2D->UEP_RX_ISO &= ~bit;
+        USBHS2D->UEP_RX_BURST &= ~bit;
+        USBHS2D->UEP_RX_TOG_AUTO &= ~bit;
+        USBHS2D->UEP_RX_RES_MODE &= ~bit;
     }
 
     return USB_RST_OK;
 }
 
-static usb_rst_e _set_endp_status(usb_endp_t ep, endp_resp_e resp, endp_tog_e tog)
-{
-    uint8_t resp_val[] = {USBHS_UEP_T_RES_ACK, USBHS_UEP_T_RES_NAK, USBHS_UEP_T_RES_NAK, USBHS_UEP_T_RES_STALL};
-    uint8_t tog_val[] = {USBHS_UEP_T_TOG_DATA0, USBHS_UEP_T_TOG_DATA1, USBHS_UEP_T_TOG_DATA2, USBHS_UEP_T_TOG_MDATA};
-
-    if (ENDP_DIR(ep))
-    {
-        ENDP_TX_CTRL(ENDP_NUM(ep)) = resp_val[resp] | tog_val[tog];
-    }
-    else
-    {
-        ENDP_RX_CTRL(ENDP_NUM(ep)) = resp_val[resp] | tog_val[tog];
-    }
-
-    return USB_RST_OK;
-}
-
-static usb_rst_e _set_endp_size(usb_endp_t ep, size_t size)
-{
-    if (ENDP_DIR(ep))
-    {
-        ENDP_TX_LEN(ENDP_NUM(ep)) = size;
-    }
-    else
-    {
-        ENDP_MAX_LEN(ENDP_NUM(ep)) = size;
-    }
-
-    return USB_RST_OK;
-}
-
-static usb_rst_e _set_endp_buf(usb_endp_t ep, const void *buf)
+static usb_rst_e _set_endp_buf(usb_endp_t ep, void *buf)
 {
     uint8_t num = ENDP_NUM(ep);
 
@@ -427,40 +491,66 @@ static usb_rst_e _set_endp_buf(usb_endp_t ep, const void *buf)
     return USB_RST_OK;
 }
 
-static usb_rst_e _set_endp_burst_size(usb_endp_t ep, size_t size)
+static usb_rst_e _set_endp_size(usb_endp_t ep, size_t size)
 {
     uint8_t num = ENDP_NUM(ep);
-
-    if (num >= USBHS2_DCP_MAX_ENDPOINTS) return USB_RST_UNSUPPORTED_ENDP;
-
-    ENDP_MAX_LEN(num) = size;
-
-    return USB_RST_OK;
-}
-
-static usb_rst_e _get_endp_status(usb_endp_t ep, endp_resp_e *resp, endp_tog_e *tog)
-{
-    uint8_t num = ENDP_NUM(ep);
-    uint8_t resp_val[] = {ENDP_RESP_NAK, ENDP_RESP_STALL, ENDP_RESP_ACK, ENDP_RESP_NAK};
-    uint8_t tog_val[] = {ENDP_TOG_DATA0, ENDP_TOG_DATA1, ENDP_TOG_DATA2, ENDP_TOG_MDATA};
 
     if (ENDP_DIR(ep))
     {
-        *resp = resp_val[ENDP_TX_CTRL(num) & USBHS_UEP_T_RES_MASK];
-        *tog = tog_val[(ENDP_TX_CTRL(num) & USBHS_UEP_T_TOG_MASK) >> 2];
+        ENDP_TX_LEN(num) = size;
+        _endp_tx_size[num] = size;
     }
-    else
+    else if (num > 0)
     {
-        *resp = resp_val[ENDP_RX_CTRL(num) & USBHS_UEP_T_RES_MASK];
-        *tog = tog_val[(ENDP_RX_CTRL(num) & USBHS_UEP_T_TOG_MASK) >> 2];
+        ENDP_RX_SIZE(num) = size;
     }
 
     return USB_RST_OK;
 }
 
-static usb_rst_e _get_endp_size(usb_endp_t ep, size_t *size)
+static usb_rst_e _set_endp_toggle(usb_endp_t ep, endp_tog_e tog)
 {
-    *size = ENDP_DIR(ep) ? ENDP_TX_LEN(ENDP_NUM(ep)) : ENDP_RX_LEN(ENDP_NUM(ep));
+    uint8_t num = ENDP_NUM(ep);
+    const uint8_t tog_val[] =
+    {
+        USBHS_UEP_T_TOG_DATA0, USBHS_UEP_T_TOG_DATA1, USBHS_UEP_T_TOG_DATA2,
+        USBHS_UEP_T_TOG_MDATA,
+    };
+
+    if (ENDP_DIR(ep))
+    {
+        USBHS2D->UEP_TX_TOG_AUTO &= ~(1 << num);
+        ENDP_TX_CTRL(num) = (ENDP_TX_CTRL(num) & ~USBHS_UEP_T_TOG_MASK) | tog_val[tog];
+        USBHS2D->UEP_TX_TOG_AUTO |= 1 << num;
+    }
+    else
+    {
+        USBHS2D->UEP_RX_TOG_AUTO &= ~(1 << num);
+        ENDP_RX_CTRL(num) = (ENDP_RX_CTRL(num) & ~USBHS_UEP_R_TOG_MASK) | tog_val[tog];
+        USBHS2D->UEP_RX_TOG_AUTO |= 1 << num;
+    }
+
+    return USB_RST_OK;
+}
+
+static usb_rst_e _set_endp_response(usb_endp_t ep, endp_resp_e resp)
+{
+    uint8_t num = ENDP_NUM(ep);
+    const uint8_t resp_val[] =
+    {
+        USBHS_UEP_T_RES_ACK, USBHS_UEP_T_RES_ACK, USBHS_UEP_T_RES_ACK, USBHS_UEP_T_RES_NAK,
+        USBHS_UEP_T_RES_STALL,
+    };
+
+    if (ENDP_DIR(ep))
+    {
+        ENDP_TX_CTRL(num) = (ENDP_TX_CTRL(num) & ~USBHS_UEP_T_RES_MASK) | resp_val[resp];
+    }
+    else
+    {
+        ENDP_RX_CTRL(num) = (ENDP_RX_CTRL(num) & ~USBHS_UEP_R_RES_MASK) | resp_val[resp];
+    }
+
     return USB_RST_OK;
 }
 
@@ -481,13 +571,42 @@ static usb_rst_e _get_endp_buf(usb_endp_t ep, void **buf)
     return USB_RST_OK;
 }
 
-static usb_rst_e _get_endp_burst_size(usb_endp_t ep, size_t *size)
+static usb_rst_e _get_endp_size(usb_endp_t ep, size_t *size)
+{
+    *size = ENDP_DIR(ep) ? ENDP_TX_LEN(ENDP_NUM(ep)) : ENDP_RX_LEN(ENDP_NUM(ep));
+    return USB_RST_OK;
+}
+
+static usb_rst_e _get_endp_toggle(usb_endp_t ep, endp_tog_e *tog)
 {
     uint8_t num = ENDP_NUM(ep);
+    const uint8_t tog_val[] = {ENDP_TOG_DATA0, ENDP_TOG_DATA1, ENDP_TOG_DATA2, ENDP_TOG_MDATA};
 
-    if (num >= USBHS2_DCP_MAX_ENDPOINTS) return USB_RST_UNSUPPORTED_ENDP;
+    if (ENDP_DIR(ep))
+    {
+        *tog = tog_val[(ENDP_TX_CTRL(num) & USBHS_UEP_T_TOG_MASK) >> 2];
+    }
+    else
+    {
+        *tog = tog_val[(ENDP_RX_CTRL(num) & USBHS_UEP_R_TOG_MASK) >> 2];
+    }
 
-    *size = ENDP_MAX_LEN(num);
+    return USB_RST_OK;
+}
+
+static usb_rst_e _get_endp_response(usb_endp_t ep, endp_resp_e *resp)
+{
+    uint8_t num = ENDP_NUM(ep);
+    const uint8_t resp_val[] = {ENDP_RESP_NAK, ENDP_RESP_STALL, ENDP_RESP_ACK, ENDP_RESP_ACK};
+
+    if (ENDP_DIR(ep))
+    {
+        *resp = resp_val[ENDP_TX_CTRL(num) & USBHS_UEP_T_RES_MASK];
+    }
+    else
+    {
+        *resp = resp_val[ENDP_RX_CTRL(num) & USBHS_UEP_R_RES_MASK];
+    }
 
     return USB_RST_OK;
 }

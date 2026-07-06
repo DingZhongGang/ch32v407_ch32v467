@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2026/02/11
+* Version            : V1.0.1
+* Date               : 2026/06/30
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -209,6 +209,13 @@ uint8_t CAN_Receive_Msg(CAN_TypeDef *CANx, uint8_t *RxBuff)
 int main(void)
 {
     uint32_t Circle_CNT = 0;
+	
+	SystemCoreClockUpdate();
+    Delay_Init();
+    USART_Printf_Init(115200);	
+    printf("SystemClk:%d\r\n", SystemClock);
+    printf("SystemCoreClk:%d\r\n", SystemCoreClock);
+	
     CAN_FilterInitTypeDef CAN_FilterInitSturcture = {0};
     CAN_FilterInitSturcture.CAN_FilterNumber = 0;
 #if (Frame_Format == Standard_Frame)

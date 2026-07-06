@@ -1,12 +1,12 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : system_ch32v4x7.h
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/12/01
+* Version            : V1.2
+* Date               : 2026/05/26
 * Description        : CH32V4x7 Device Peripheral Access Layer System Header File.
 *********************************************************************************
-* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* Attention: This software (modified or not) and binary are used for 
+* Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #ifndef __SYSTEM_CH32V4x7_H 

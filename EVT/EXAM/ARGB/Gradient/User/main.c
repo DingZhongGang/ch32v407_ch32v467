@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT  *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2026/02/10
+* Version            : V1.0.1
+* Date               : 2026/07/01
 * Description        : Main program body
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -161,7 +161,7 @@ void ARGB_WS2812B_DMA_Init(uint8_t *ARGB_DMA_Buffer, size_t buffer_size)
 {
     RCC_HBPeriphClockCmd(RCC_HBPeriph_DMA1, ENABLE);
 
-    DMA_InitTypeDef DMA_InitStructure;
+    DMA_InitTypeDef DMA_InitStructure = {0};
 
     DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&(ARGB->DATAR);
     DMA_InitStructure.DMA_MemoryBaseAddr     = (uint32_t)ARGB_DMA_Buffer;
@@ -194,7 +194,7 @@ void ARGB_WS2812B_Init(uint8_t *ARGB_DMA_Buffer, size_t buffer_size)
     RCC_HBPeriphClockCmd(RCC_HBPeriph_ARGB, ENABLE);
 
     // Initialize ARGB configuration structure
-    ARGB_InitTypeDef ARGB_InitStruct;
+    ARGB_InitTypeDef ARGB_InitStruct = {0};
 
     // Configure ARGB parameters
     ARGB_InitStruct.ARGB_Length     = buffer_size - 1;         // Set buffer length (minus 1 for zero-based indexing)

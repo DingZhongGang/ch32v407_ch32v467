@@ -1,12 +1,12 @@
-/********************************** (C) COPYRIGHT ************* ******************
+/********************************** (C) COPYRIGHT *******************************
 * File Name          : eth_driver.h
 * Author             : WCH
-* Version            : V1.3.0
-* Date               : 2022/06/02
+* Version            : V1.2
+* Date               : 2026/05/26
 * Description        : This file contains the headers of the ETH Driver.
 *********************************************************************************
-* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* Attention: This software (modified or not) and binary are used for 
+* Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #ifndef __ETH_DRIVER__

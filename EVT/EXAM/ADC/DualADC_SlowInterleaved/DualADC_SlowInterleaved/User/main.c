@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/12/01
+* Version            : V1.0.1
+* Date               : 2026/06/30
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -61,7 +61,7 @@ void ADC_Function_Init(void)
     ADC_InitStructure.ADC_NbrOfChannel = 1;
     ADC_Init(ADC1, &ADC_InitStructure);
 
-    ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_CyclesMode3);
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_2, 1, ADC_SampleTime_CyclesMode3);
     NVIC_EnableIRQ(ADC1_2_IRQn);
     ADC_ITConfig( ADC1, ADC_IT_EOC, ENABLE);
 
@@ -73,7 +73,7 @@ void ADC_Function_Init(void)
     while(ADC_GetCalibrationStatus(ADC1));
 
     ADC_Init(ADC2, &ADC_InitStructure);
-    ADC_RegularChannelConfig(ADC2, ADC_Channel_1, 1, ADC_SampleTime_CyclesMode3);
+    ADC_RegularChannelConfig(ADC2, ADC_Channel_2, 1, ADC_SampleTime_CyclesMode3);
 
     ADC_SoftwareStartConvCmd(ADC2, ENABLE);
     ADC_Cmd(ADC2, ENABLE);
@@ -108,9 +108,7 @@ int main(void)
     ADC_SoftwareStartConvCmd(ADC1, ENABLE);
     while(1)
     {
-        ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 
-        Delay_Ms(500);
     }
 }
 

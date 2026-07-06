@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : usart.h
 * Author             : WCH
-* Version            : V1.0
-* Date               : 2026/02/12
+* Version            : V1.2
+* Date               : 2026/05/26
 * Description        : Usart driver for ch32v407.
 *********************************************************************************
 * Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -20,8 +20,7 @@ extern "C" {
 /* @include */
 #include <stdint.h>
 
-#include "usb_define.h"
-#include "class/cdc/cdc.h"
+#include "usb_driver.h"
 
 /* @function declaration */
 usb_rst_e usart_init(void);

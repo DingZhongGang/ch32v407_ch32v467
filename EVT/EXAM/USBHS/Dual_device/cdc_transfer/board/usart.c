@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : usart.c
 * Author             : WCH
-* Version            : V1.0
-* Date               : 2026/02/12
+* Version            : V1.0.3
+* Date               : 2026/07/01
 * Description        : Usart driver for ch32v407.
 *********************************************************************************
 * Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -36,7 +36,7 @@ usb_rst_e usart_init(void)
     USART_DeInit(USART3);
 
     RCC_PB2PeriphClockCmd(RCC_PB2Periph_GPIOB, ENABLE);
-    GPIO_InitTypeDef GPIO_InitStructure;
+    GPIO_InitTypeDef GPIO_InitStructure = {0};
 
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_High;
@@ -45,7 +45,7 @@ usb_rst_e usart_init(void)
 
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_High;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
 
     RCC_HBPeriphClockCmd(RCC_HBPeriph_DMA1, ENABLE);
@@ -54,7 +54,7 @@ usb_rst_e usart_init(void)
 
     DMA_DeInit(DMA1_Channel2);
     memset(&DMA_InitStructure, 0, sizeof(DMA_InitStructure));
-    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&USART3->DATAR);
+    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&USART3->DATAR;
     DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)NULL;
     DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
     DMA_InitStructure.DMA_BufferSize = 0;
@@ -63,14 +63,14 @@ usb_rst_e usart_init(void)
     DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
     DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
     DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
-    DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;
+    DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
     DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
     DMA_Init(DMA1_Channel2, &DMA_InitStructure);
     DMA_Cmd(DMA1_Channel2, ENABLE);
 
     DMA_DeInit(DMA1_Channel3);
     memset(&DMA_InitStructure, 0, sizeof(DMA_InitStructure));
-    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&USART3->DATAR);
+    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&USART3->DATAR;
     DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)_rx_buffer;
     DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
     DMA_InitStructure.DMA_BufferSize = RX_BUFFER_SIZE;
@@ -79,7 +79,7 @@ usb_rst_e usart_init(void)
     DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
     DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
     DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
-    DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;
+    DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
     DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
     DMA_Init(DMA1_Channel3, &DMA_InitStructure);
     DMA_Cmd(DMA1_Channel3, ENABLE);

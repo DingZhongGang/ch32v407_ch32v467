@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : usbd_composite_km.c
  * Author             : WCH
- * Version            : V1.0.1
- * Date               : 2026/05/20
+ * Version            : V1.0.2
+ * Date               : 2026/07/01
  * Description        : USB keyboard and mouse processing.
 *********************************************************************************
 * Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -53,7 +53,7 @@ void USART4_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
  */
 void TIM3_Init( uint16_t arr, uint16_t psc )
 {
-    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure = {0};
 
     /* Enable Timer3 Clock */
     RCC_PB1PeriphClockCmd( RCC_PB1Periph_TIM3, ENABLE );
@@ -111,8 +111,8 @@ void TIM3_IRQHandler( void )
  */
 void USART4_Init( uint32_t baudrate )
 {
-    GPIO_InitTypeDef GPIO_InitStructure;
-    USART_InitTypeDef USART_InitStructure;
+    GPIO_InitTypeDef GPIO_InitStructure = {0};
+    USART_InitTypeDef USART_InitStructure = {0};
 
     RCC_PB2PeriphClockCmd( RCC_PB2Periph_AFIO | RCC_PB2Periph_GPIOC, ENABLE );
     RCC_PB1PeriphClockCmd( RCC_PB1Periph_USART4, ENABLE );

@@ -1,5 +1,5 @@
 
-Nanjing Qinheng Microelectronics Co., Ltd. 2026.05
+Nanjing Qinheng Microelectronics Co., Ltd. 2026.07
 
 https://wch-ic.com
 
@@ -146,9 +146,7 @@ Directory
   |      |      |      |      |-- RTC_Calibration：RTC calibrate Routines  
   |      |      |      |-- SDIO
   |      |      |      |      |-- SDIO_SD：SDIO routine to operate SD card
-  |      |      |      |      |-- SDIO_SD_FATFS：SD card migrate FATFS file system
   |      |      |      |      |-- SDIO_EMMC：SDIO routine to operate eMMC card
-  |      |      |      |      |-- SDIO_Mode：SDIO Host/Slave mode transceiver routine
   |      |      |      |-- SPI
   |      |      |      |      |-- 1Lines_half-duplex: single wire half duplex mode, master/slave mode, data transceiver
   |      |      |      |      |-- 2Lines_FullDuplex: two-wire full duplex mode, master/slave mode, data transceiver

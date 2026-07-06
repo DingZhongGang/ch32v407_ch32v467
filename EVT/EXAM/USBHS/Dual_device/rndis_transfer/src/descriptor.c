@@ -1,17 +1,19 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : descriptor.c
 * Author             : WCH
-* Version            : V1.0
-* Date               : 2026/02/10
+* Version            : V1.2
+* Date               : 2026/05/26
 * Description        : Usb descriptor.
 *********************************************************************************
-* Copyright (c) 2025 Nanjing Qinheng Microelectronics Co., Ltd.
+* Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
 /* @include */
 #include <string.h>
+
+#include "board.h"
 
 #include "descriptor.h"
 
@@ -27,7 +29,7 @@ const desc_device_t device_desc =
     .bMaxPacketSize0 = 0x40,
     .idVendor = 0x1A86,
     .idProduct = 0xFE51,
-    .bcdDevice = USB_DEVICE_DRIVER_VERSION,
+    .bcdDevice = USB_DRIVER_VERSION_NUMBER,
     .iManufacturer = 0x01,
     .iProduct = 0x02,
     .iSerialNumber = 0x00,
@@ -200,7 +202,7 @@ const uint8_t config_fs_desc[] =
 static uint8_t _other_speed_desc[CONFIG_DESC_SIZE];
 
 /* @function declaration */
-void *_get_string_desc(uint8_t index, size_t *size);
+static inline void *_get_string_desc(uint8_t index, size_t *size);
 
 usb_rst_e get_device_desc(usbd_handle_t *h, const usb_req_t *req, void **buf, size_t *size)
 {
@@ -226,6 +228,7 @@ usb_rst_e get_device_desc(usbd_handle_t *h, const usb_req_t *req, void **buf, si
 
     case USB_DESC_STRING:
         *buf = _get_string_desc(req->wValue & 0xFF, size);
+        *size = USB_MIN(req->wLength, *size);
         return *buf ? USB_RST_OK : USB_RST_FAILED;
 
     case USB_DESC_DEVICE_QUALIFIER:
@@ -251,7 +254,7 @@ usb_rst_e get_device_desc(usbd_handle_t *h, const usb_req_t *req, void **buf, si
     return USB_RST_FAILED;
 }
 
-void *_get_string_desc(uint8_t index, size_t *size)
+static inline void *_get_string_desc(uint8_t index, size_t *size)
 {
     size_t desc_size;
     static uint16_t desc_buf[64];

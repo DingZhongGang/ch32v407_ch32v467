@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2026/02/05
+* Version            : V1.0.1
+* Date               : 2026/07/01
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -52,8 +52,8 @@ void TIM2_Init (void) {
  */
 
 void AT_Init (void) {
-    GPIO_InitTypeDef GPIO_InitStructure;
-    USART_InitTypeDef USART_InitStructure;
+    GPIO_InitTypeDef GPIO_InitStructure = {0};
+    USART_InitTypeDef USART_InitStructure = {0};
 
     RCC_PB2PeriphClockCmd(RCC_PB2Periph_AFIO | RCC_PB2Periph_USART1 | RCC_PB2Periph_GPIOA, ENABLE);
 

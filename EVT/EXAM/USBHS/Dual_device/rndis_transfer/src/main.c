@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0
-* Date               : 2026/02/10
+* Version            : V1.2
+* Date               : 2026/05/26
 * Description        : Main function file.
 *********************************************************************************
 * Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -10,24 +10,36 @@
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
+/*
+ * 功能说明 / Description:
+ *   本示例演示了一个双 USB RNDIS 设备数据转发功能。板上两个 USB 控制器
+ *   分别枚举为 RNDIS 网卡设备，从一个设备接收到的网络数据包会转发到
+ *   另一个设备发送出去，实现两个 USB 网卡之间的数据透传。
+ *
+ * 使用方法 / Usage:
+ *   1. 编译并烧录固件到目标板
+ *   2. 将目标板的两个 USB 接口分别连接到 PC（或两个不同的 PC）
+ *   3. PC 设备管理器中应识别到两个 "RNDIS Transfer Demo" 网卡设备
+ *   4. 引脚对应请查看 pin_description.md 文件
+ *   5. 配置两个网卡的 IP 地址，即可在两个 PC 之间通过该设备通信
+ *
+ * 其他说明 / Notes:
+ *
+ */
+
 /* @include */
 #include <string.h>
 #include <assert.h>
 
 #include "board.h"
 
-#include "class/cdc/cdcd.h"
-#include "class/cdc/cdc_rndis.h"
+#include "usb_driver.h"
 
 #include "descriptor.h"
 
 /* @define */
 #ifndef USBD0_INDEX
 #define USBD0_INDEX         0
-#endif
-
-#ifndef USBD0_INTERRUPT
-#define USBD0_INTERRUPT     1
 #endif
 
 #if USBD0_INDEX >= BOARD_USBDC_COUNT
@@ -38,15 +50,11 @@
 #define USBD1_INDEX         1
 #endif
 
-#ifndef USBD1_INTERRUPT
-#define USBD1_INTERRUPT     1
-#endif
-
 #if USBD1_INDEX >= BOARD_USBDC_COUNT
 #error Not supported this USBD_INDEX!
 #endif
 
-#define BUFFER_COUNT        8
+#define BUFFER_COUNT        6
 #define BUFFER_SIZE         4096
 
 /* @struct */
@@ -76,7 +84,6 @@ typedef struct
 {
     usbd_handle_t *h;
     cdcd_rndis_itf_t itf;
-    uint16_t bulk_size;
     manage_t xfer_manage;
     xfer_count_t xfer_count;
     pack_t xfer_packs[BUFFER_COUNT];
@@ -87,7 +94,7 @@ typedef struct
 
 /* @global */
 rndis_dev_t rndis_devs[2];
-const uint32_t response_available[] = {RNDIS_RESPONSE_AVAILABLE, 0x00000000};
+uint32_t response_available[] = {RNDIS_RESPONSE_AVAILABLE, 0x00000000};
 
 const uint32_t supported_oids[] =
 {
@@ -121,11 +128,11 @@ void command_handle(rndis_dev_t *dev);
 void status_upload_handle(rndis_dev_t *dev);
 void tranxfer_handle(rndis_dev_t *dev);
 void rndis_oid_query(rndis_dev_t *dev, void *buf, uint32_t oid, uint32_t *status, uint32_t *length);
-void rndis_oid_set(rndis_dev_t *dev, const void *buf, uint32_t oid, uint32_t *status, uint32_t length);
+void rndis_oid_set(rndis_dev_t *dev, void *buf, uint32_t oid, uint32_t *status, uint32_t length);
 void reset_callback(usbd_handle_t *h, uint32_t parameter);
 usb_rst_e rndis_itf_setup(usbd_handle_t *h, const usb_req_t *req, void **buf, size_t *size);
-usb_rst_e rndis_itf_status(usbd_handle_t *h, const usb_req_t *req, const void *buf, size_t size);
-endp_resp_e download_callback(usbd_handle_t *h, usb_endp_t ep, const void *buf, size_t size);
+void rndis_itf_status(usbd_handle_t *h, const usb_req_t *req, void *buf, size_t size);
+endp_resp_e download_callback(usbd_handle_t *h, usb_endp_t ep, void *buf, size_t size);
 
 int main(void)
 {
@@ -140,7 +147,7 @@ int main(void)
     rndis_devs[0].itf.ep_out = 0x03;
     rndis_devs[0].itf.msg_stage = RNDIS_MSG_STAGE_IDLE;
 
-    usbd_handle_t *h0 = board_usbd_init(USBD0_INDEX, USBD0_INTERRUPT);
+    usbd_handle_t *h0 = board_usbd_init(USBD0_INDEX);
     assert(h0 != NULL);
 
     rndis_devs[0].h = h0;
@@ -149,11 +156,11 @@ int main(void)
 
     itf = &rndis_devs[0].itf;
     assert(usbd_register_event_callback(h0, USBD_CB_EVENT_RESET, reset_callback) == USB_RST_OK);
-    assert(usbd_register_ctrl_callback(h0, 0x80, USB_REQ_CODE_GET_DESCRIPTOR, get_device_desc, NULL) == USB_RST_OK);
-    assert(usbd_register_itf_callback(h0, itf->ctrl_itf, rndis_itf_setup, rndis_itf_status) == USB_RST_OK);
+    assert(usbd_register_req_callback(h0, 0x80, USB_REQ_CODE_GET_DESCRIPTOR, get_device_desc, NULL, NULL) == USB_RST_OK);
+    assert(usbd_register_itf_callback(h0, itf->ctrl_itf, rndis_itf_setup, NULL, rndis_itf_status) == USB_RST_OK);
     assert(usbd_register_data_callback(h0, itf->ep_out, download_callback) == USB_RST_OK);
 
-    assert(usbd_open(h0, USB_FALSE, USB_FALSE) == USB_RST_OK);
+    assert(usbd_open(h0, USB_SPEED_HIGH, USB_FALSE) == USB_RST_OK);
 
     rndis_devs[1].itf.ctrl_itf = 0x00;
     rndis_devs[1].itf.data_itf = 0x01;
@@ -162,7 +169,7 @@ int main(void)
     rndis_devs[1].itf.ep_out = 0x03;
     rndis_devs[1].itf.msg_stage = RNDIS_MSG_STAGE_IDLE;
 
-    usbd_handle_t *h1 = board_usbd_init(USBD1_INDEX, USBD1_INTERRUPT);
+    usbd_handle_t *h1 = board_usbd_init(USBD1_INDEX);
     assert(h1 != NULL);
 
     rndis_devs[1].h = h1;
@@ -171,22 +178,14 @@ int main(void)
 
     itf = &rndis_devs[1].itf;
     assert(usbd_register_event_callback(h1, USBD_CB_EVENT_RESET, reset_callback) == USB_RST_OK);
-    assert(usbd_register_ctrl_callback(h1, 0x80, USB_REQ_CODE_GET_DESCRIPTOR, get_device_desc, NULL) == USB_RST_OK);
-    assert(usbd_register_itf_callback(h1, itf->ctrl_itf, rndis_itf_setup, rndis_itf_status) == USB_RST_OK);
+    assert(usbd_register_req_callback(h1, 0x80, USB_REQ_CODE_GET_DESCRIPTOR, get_device_desc, NULL, NULL) == USB_RST_OK);
+    assert(usbd_register_itf_callback(h1, itf->ctrl_itf, rndis_itf_setup, NULL, rndis_itf_status) == USB_RST_OK);
     assert(usbd_register_data_callback(h1, itf->ep_out, download_callback) == USB_RST_OK);
 
-    assert(usbd_open(h1, USB_FALSE, USB_FALSE) == USB_RST_OK);
+    assert(usbd_open(h1, USB_SPEED_HIGH, USB_FALSE) == USB_RST_OK);
 
     while (1)
     {
-#if !(USBD0_INTERRUPT)
-        usbd_drv_task(h0);
-#endif
-
-#if !(USBD1_INTERRUPT)
-        usbd_drv_task(h1);
-#endif
-
         rndis_dev_t *dev;
 
         for (uint8_t i = 0; i < sizeof(rndis_devs) / sizeof(rndis_dev_t); i++)
@@ -338,15 +337,7 @@ void tranxfer_handle(rndis_dev_t *dev)
 
         pack_t *pack = &dev->xfer_packs[dev->xfer_manage.deal];
 
-        if (pack->size >= dst_dev->bulk_size && usbd_is_burst_support(dst_dev->h) == USB_FALSE)
-        {
-            if (usbd_upload(dst_dev->h, dst_dev->itf.ep_in, pack->addr, dst_dev->bulk_size) == USB_RST_OK)
-            {
-                pack->addr += dst_dev->bulk_size;
-                pack->size -= dst_dev->bulk_size;
-            }
-        }
-        else if (usbd_upload(dst_dev->h, dst_dev->itf.ep_in, pack->addr, pack->size) == USB_RST_OK)
+        if (usbd_upload(dst_dev->h, dst_dev->itf.ep_in, pack->addr, pack->size) == USB_RST_OK)
         {
             pack->size = 0;
             dev->xfer_manage.deal = (dev->xfer_manage.deal + 1) % BUFFER_COUNT;
@@ -355,17 +346,12 @@ void tranxfer_handle(rndis_dev_t *dev)
             dev->xfer_manage.count--;
             usbd_interrupt_ctrl(dev->h, USB_TRUE);
         }
-
     }
 
     if (dev->xfer_manage.stop && dev->xfer_manage.count < BUFFER_COUNT - 2)
     {
-        usbd_interrupt_ctrl(dev->h, USB_FALSE);
-        if (usbd_download(dev->h, dev->itf.ep_out, dev->xfer_bufs[dev->xfer_manage.load], dev->bulk_size) == USB_RST_OK)
-        {
-            dev->xfer_manage.stop = 0;
-        }
-        usbd_interrupt_ctrl(dev->h, USB_TRUE);
+        usbd_endp_set_response(dev->h, dev->itf.ep_out, ENDP_RESP_ACK);
+        dev->xfer_manage.stop = 0;
     }
 }
 
@@ -587,7 +573,7 @@ void rndis_oid_query(rndis_dev_t *dev, void *buf, uint32_t oid, uint32_t *status
     }
 }
 
-void rndis_oid_set(rndis_dev_t *dev, const void *buf, uint32_t oid, uint32_t *status, uint32_t length)
+void rndis_oid_set(rndis_dev_t *dev, void *buf, uint32_t oid, uint32_t *status, uint32_t length)
 {
     *status = RNDIS_STATUS_FAILURE;
 
@@ -634,7 +620,7 @@ void reset_callback(usbd_handle_t *h, uint32_t parameter)
 {
     rndis_dev_t *dev = h == rndis_devs[0].h ? &rndis_devs[0] : &rndis_devs[1];
 
-    dev->bulk_size = usbd_get_speed(h) == USB_SPEED_HIGH ? 512 : 64;
+    uint16_t bulk_size = usbd_get_speed(h) == USB_SPEED_HIGH ? 512 : 64;
 
     dev->itf.init_status = USB_FALSE;
     dev->itf.msg_stage = RNDIS_MSG_STAGE_IDLE;
@@ -643,20 +629,10 @@ void reset_callback(usbd_handle_t *h, uint32_t parameter)
     memset(&dev->xfer_manage, 0, sizeof(dev->xfer_manage));
     memset(&dev->xfer_manage, 0, sizeof(dev->xfer_manage));
 
-    usbd_endp_open(h, dev->itf.ep_notif, ENDP_TYPE_NORMAL, 64, NULL, ENDP_RESP_NAK);
-
-    if (usbd_is_burst_support(h))
-    {
-        usbd_endp_open(h, dev->itf.ep_in, ENDP_TYPE_BURST, dev->bulk_size, NULL, ENDP_RESP_NAK);
-        usbd_endp_open(h, dev->itf.ep_out, ENDP_TYPE_BURST, dev->bulk_size, dev->xfer_bufs[0], ENDP_RESP_ACK);
-        usbd_endp_set_burst_size(h, dev->itf.ep_in, dev->bulk_size);
-        usbd_endp_set_burst_size(h, dev->itf.ep_out, dev->bulk_size);
-    }
-    else
-    {
-        usbd_endp_open(h, dev->itf.ep_in, ENDP_TYPE_NORMAL, dev->bulk_size, NULL, ENDP_RESP_NAK);
-        usbd_endp_open(h, dev->itf.ep_out, ENDP_TYPE_NORMAL, dev->bulk_size, dev->xfer_bufs[0], ENDP_RESP_ACK);
-    }
+    usbd_endp_open(h, dev->itf.ep_notif, USBD_ENDP_FEATURE_NORMAL, 64);
+    usbd_endp_open(h, dev->itf.ep_in, USBD_ENDP_FEATURE_BURST | USBD_ENDP_FEATURE_ZLP, bulk_size);
+    usbd_endp_open(h, dev->itf.ep_out, USBD_ENDP_FEATURE_BURST | USBD_ENDP_FEATURE_ZLP, bulk_size);
+    usbd_download(h, dev->itf.ep_out, dev->xfer_bufs[dev->xfer_manage.load], bulk_size);
 }
 
 usb_rst_e rndis_itf_setup(usbd_handle_t *h, const usb_req_t *req, void **buf, size_t *size)
@@ -681,7 +657,7 @@ usb_rst_e rndis_itf_setup(usbd_handle_t *h, const usb_req_t *req, void **buf, si
     return USB_RST_FAILED;
 }
 
-usb_rst_e rndis_itf_status(usbd_handle_t *h, const usb_req_t *req, const void *buf, size_t size)
+void rndis_itf_status(usbd_handle_t *h, const usb_req_t *req, void *buf, size_t size)
 {
     rndis_dev_t *dev = h == rndis_devs[0].h ? &rndis_devs[0] : &rndis_devs[1];
 
@@ -694,38 +670,24 @@ usb_rst_e rndis_itf_status(usbd_handle_t *h, const usb_req_t *req, const void *b
     {
         dev->itf.msg_stage = RNDIS_MSG_STAGE_IDLE;
     }
-
-    return USB_RST_OK;
 }
 
-endp_resp_e download_callback(usbd_handle_t *h, usb_endp_t ep, const void *buf, size_t size)
+endp_resp_e download_callback(usbd_handle_t *h, usb_endp_t ep, void *buf, size_t size)
 {
     rndis_dev_t *dev = h == rndis_devs[0].h ? &rndis_devs[0] : &rndis_devs[1];
+    dev->xfer_packs[dev->xfer_manage.load].addr = (uint8_t *)buf;
+    dev->xfer_packs[dev->xfer_manage.load].size = size;
+    dev->xfer_manage.load = (dev->xfer_manage.load + 1) % BUFFER_COUNT;
+    dev->xfer_manage.count++;
+    usbd_endp_set_buf(h, dev->itf.ep_out, dev->xfer_bufs[dev->xfer_manage.load]);
 
-    uint8_t load = dev->xfer_manage.load;
-    pack_t *pack = &dev->xfer_packs[load];
-    if (size >= dev->bulk_size && pack->size + dev->bulk_size < sizeof(dev->xfer_bufs[0]) &&
-        usbd_is_burst_support(h) == USB_FALSE)
+    if (dev->xfer_manage.count >= BUFFER_COUNT - 2)
     {
-        pack->size += size;
-        usbd_endp_set_buf(h, dev->itf.ep_out, dev->xfer_bufs[load] + pack->size);
-        return ENDP_RESP_ACK;
+        dev->xfer_manage.stop = 1;
+        return ENDP_RESP_NAK;
     }
     else
     {
-        pack->addr = dev->xfer_bufs[load];
-        pack->size += size;
-        dev->xfer_manage.load = (load + 1) % BUFFER_COUNT;
-        dev->xfer_manage.count++;
-        if (dev->xfer_manage.count >= BUFFER_COUNT - 2)
-        {
-            dev->xfer_manage.stop = 1;
-            return ENDP_RESP_NAK;
-        }
-        else
-        {
-            usbd_endp_set_buf(h, dev->itf.ep_out, dev->xfer_bufs[dev->xfer_manage.load]);
-            return ENDP_RESP_ACK;
-        }
+        return ENDP_RESP_ACK;
     }
 }

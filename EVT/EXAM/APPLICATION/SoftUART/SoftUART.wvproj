@@ -415,7 +415,7 @@
 			},
 			"debugInRAM": false
 		},
-		"svdpath": "${WCH:SDK:default}/RISC-V/CH32V307/NoneOS/CH32V307xx.svd",
+		"svdpath": "${WCH:SDK:default}/RISC-V/CH32V4X7/NoneOS/CH32V4X7.svd",
 		"output": {
 			"showDebugGDBTrace": true,
 			"saveDebugOutputToFile": false,

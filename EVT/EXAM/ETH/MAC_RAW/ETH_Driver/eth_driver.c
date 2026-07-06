@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : eth_driver.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2026/02/04
+* Version            : V1.0.1
+* Date               : 2026/07/01
 * Description        : eth program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -259,24 +259,45 @@ void ETH_PHYLink( void )
 void PHY_LEDCfg(void)
 {
     uint16_t RegValue;
+    uint32_t ChipId;
     GPIO_InitTypeDef GPIO_InitStructure = {0};
 
-    if((FEATURE_SIGN & 0x01) == 0) return;
+    if(((*(uint32_t *)FEATURE_SIGN) & 0x01) == 0) return;
 
-    RCC_PB2PeriphClockCmd(RCC_PB2Periph_AFIO | RCC_PB2Periph_GPIOD, ENABLE);
-    AFIO->PCFR1 |= 1<<31;
+    ChipId = (DBGMCU_GetCHIPID() >> 16) & 0xf;
+    if((ChipId == 2) || (ChipId == 5))
+    {
+        RCC_PB2PeriphClockCmd(RCC_PB2Periph_AFIO | RCC_PB2Periph_GPIOD, ENABLE);
+        AFIO->PCFR1 |= 1<<31;
 
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_High;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-    GPIO_Init(GPIOD, &GPIO_InitStructure);
-    GPIO_ResetBits(GPIOD, GPIO_Pin_14);
+        GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14;
+        GPIO_InitStructure.GPIO_Speed = GPIO_Speed_High;
+        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+        GPIO_Init(GPIOD, &GPIO_InitStructure);
+        GPIO_ResetBits(GPIOD, GPIO_Pin_14);
 
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_High;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-    GPIO_Init(GPIOD, &GPIO_InitStructure);
-    GPIO_ResetBits(GPIOD, GPIO_Pin_15);
+        GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
+        GPIO_InitStructure.GPIO_Speed = GPIO_Speed_High;
+        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+        GPIO_Init(GPIOD, &GPIO_InitStructure);
+        GPIO_ResetBits(GPIOD, GPIO_Pin_15);
+    }
+    else
+    {
+        RCC_PB2PeriphClockCmd(RCC_PB2Periph_AFIO | RCC_PB2Periph_GPIOE, ENABLE);
+
+        GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+        GPIO_InitStructure.GPIO_Speed = GPIO_Speed_High;
+        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+        GPIO_Init(GPIOE, &GPIO_InitStructure);
+        GPIO_ResetBits(GPIOE, GPIO_Pin_8);
+
+        GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+        GPIO_InitStructure.GPIO_Speed = GPIO_Speed_High;
+        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+        GPIO_Init(GPIOE, &GPIO_InitStructure);
+        GPIO_ResetBits(GPIOE, GPIO_Pin_9);
+    }
 
     ETH_WritePHYRegister(gPHYAddress, PHY_PAG_SEL, PHY_REG_PAGE7 );
 
@@ -380,7 +401,7 @@ uint32_t ETH_RegInit( ETH_InitTypeDef* ETH_InitStruct, uint16_t PHYAddress )
  */
 void ETH_Configuration( uint8_t *macAddr )
 {
-    ETH_InitTypeDef ETH_InitStructure;
+    ETH_InitTypeDef ETH_InitStructure = {0};
     uint16_t timeout = 10000;
 
     gPHYAddress = PHY_ADDRESS;

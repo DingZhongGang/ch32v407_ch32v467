@@ -1,11 +1,11 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : msc.h
 * Author             : WCH
-* Version            : V1.0
-* Date               : 2025/10/30
+* Version            : V1.2
+* Date               : 2026/05/26
 * Description        : Msc class define.
 *********************************************************************************
-* Copyright (c) 2025 Nanjing Qinheng Microelectronics Co., Ltd.
+* Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
@@ -53,6 +53,7 @@ typedef enum
     SCSI_CMD_READ_FORMAT_CAPACITY            = 0x23,
     SCSI_CMD_READ_10                         = 0x28,
     SCSI_CMD_WRITE_10                        = 0x2A,
+    SCSI_CMD_SYNCHRONIZE_CACHE_10            = 0x35,
     SCSI_CMD_READ_TOC_PMA_ATIP               = 0x43,
     SCSI_CMD_READ_HEADER                     = 0x44,
     SCSI_CMD_GET_CONFIGURATION               = 0x46,
@@ -60,6 +61,10 @@ typedef enum
     SCSI_CMD_READ_DISC_INFORMATION           = 0x51,
     SCSI_CMD_READ_TRACK_INFORMATION          = 0x52,
     SCSI_CMD_MODE_SENSE_10                   = 0x5A,
+    SCSI_CMD_LBA_EXTENTS_FOR_BUS_ENCRYPTION  = 0x85,
+    SCSI_CMD_GET_PERFORMANCE                 = 0xAC,
+    SCSI_CMD_READ_DISC_STRUCTURE_CDB         = 0xAD,
+    SCSI_CMD_SET_CD_SPEED                    = 0xBB,
 } scsi_cmd_e;
 
 typedef enum

@@ -1,9 +1,9 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : ethernet.c
 * Author             : WCH
-* Version            : V1.0
-* Date               : 2026/01/19
-* Description        : Ethernet driver for ch32v307.
+* Version            : V1.3
+* Date               : 2026/07/01
+* Description        : Ethernet driver for ch32v4x7.
 *********************************************************************************
 * Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for
@@ -22,7 +22,7 @@ extern "C" {
 
 #include "ch32v4x7_eth.h"
 
-#include "usb_define.h"
+#include "usb_driver.h"
 
 /* @function declaration */
 usb_rst_e ethernet_init(void);

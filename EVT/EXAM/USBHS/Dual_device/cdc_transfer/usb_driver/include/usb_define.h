@@ -1,11 +1,11 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : usb_define.h
 * Author             : WCH
-* Version            : V1.0
-* Date               : 2025/08/13
+* Version            : V1.2
+* Date               : 2026/05/26
 * Description        : Usb driver define.
 *********************************************************************************
-* Copyright (c) 2025 Nanjing Qinheng Microelectronics Co., Ltd.
+* Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
@@ -21,27 +21,33 @@ extern "C" {
 #include <stdint.h>
 
 /* @define */
-#define ENDP_DIR(endp)          ((endp) & 0x80)
-#define ENDP_NUM(endp)          ((endp) & 0x7F)
+#define USB_DRIVER_VERSION_STRING       "v1.2"
+#define USB_DRIVER_VERSION_NUMBER       (0x0120)
 
-#define USB_MIN(a, b)           ((a) < (b) ? (a) : (b))
+#define USB_MAX_EP_NUM                  (16)
 
-#define U16_HIGH(_u16)          ((uint8_t)(((_u16) >> 8) & 0x00FF))
-#define U16_LOW(_u16)           ((uint8_t)((_u16) & 0x00FF))
-#define U16_TO_U8S_BE(_u16)     U16_HIGH(_u16), U16_LOW(_u16)
-#define U16_TO_U8S_LE(_u16)     U16_LOW(_u16), U16_HIGH(_u16)
+#define ENDP_DIR(endp)                  ((endp) & 0x80)
+#define ENDP_NUM(endp)                  ((endp) & 0x7F)
 
-#define U32_BYTE3(_u32)         ((uint8_t) ((((uint32_t) _u32) >> 24) & 0x000000ff))
-#define U32_BYTE2(_u32)         ((uint8_t) ((((uint32_t) _u32) >> 16) & 0x000000ff))
-#define U32_BYTE1(_u32)         ((uint8_t) ((((uint32_t) _u32) >>  8) & 0x000000ff))
-#define U32_BYTE0(_u32)         ((uint8_t) (((uint32_t)  _u32)        & 0x000000ff))
+#define USB_MIN(a, b)                   ((a) < (b) ? (a) : (b))
+#define USB_MAX(a, b)                   ((a) > (b) ? (a) : (b))
 
-#define U32_TO_U8S_BE(_u32)     U32_BYTE3(_u32), U32_BYTE2(_u32), U32_BYTE1(_u32), U32_BYTE0(_u32)
-#define U32_TO_U8S_LE(_u32)     U32_BYTE0(_u32), U32_BYTE1(_u32), U32_BYTE2(_u32), U32_BYTE3(_u32)
+#define U16_HIGH(_u16)                  ((uint8_t)(((_u16) >> 8) & 0x00FF))
+#define U16_LOW(_u16)                   ((uint8_t)(((_u16) >> 0) & 0x00FF))
+#define U16_TO_U8S_BE(_u16)             U16_HIGH(_u16), U16_LOW(_u16)
+#define U16_TO_U8S_LE(_u16)             U16_LOW(_u16), U16_HIGH(_u16)
+
+#define U32_BYTE3(_u32)                 ((uint8_t) ((((uint32_t) _u32) >> 24) & 0x000000FF))
+#define U32_BYTE2(_u32)                 ((uint8_t) ((((uint32_t) _u32) >> 16) & 0x000000FF))
+#define U32_BYTE1(_u32)                 ((uint8_t) ((((uint32_t) _u32) >>  8) & 0x000000FF))
+#define U32_BYTE0(_u32)                 ((uint8_t) ((((uint32_t) _u32) >>  0) & 0x000000FF))
+
+#define U32_TO_U8S_BE(_u32)             U32_BYTE3(_u32), U32_BYTE2(_u32), U32_BYTE1(_u32), U32_BYTE0(_u32)
+#define U32_TO_U8S_LE(_u32)             U32_BYTE0(_u32), U32_BYTE1(_u32), U32_BYTE2(_u32), U32_BYTE3(_u32)
 
 /* @typedef */
-typedef uint8_t                 usb_bool_t;
-typedef uint8_t                 usb_endp_t;
+typedef uint8_t                         usb_bool_t;
+typedef uint8_t                         usb_endp_t;
 
 /* Return result enum type */
 typedef enum
@@ -59,7 +65,7 @@ typedef enum
     USB_RST_UNKNOW_EVENT,
     USB_RST_UNSUPPORTED_ENDP,
     USB_RST_UNSUPPORTED_EVENT,
-    USB_RST_UNSUPPORTED_BURST,
+    USB_RST_UNSUPPORTED_SOF,
 } usb_rst_e;
 
 typedef enum
@@ -73,11 +79,50 @@ typedef enum
     USB_SPEED_FULL,
     USB_SPEED_LOW,
     USB_SPEED_HIGH,
+    USB_SPEED_SUPER,
     USB_SPEED_UNKNOW,
 } usb_speed_e;
 
 typedef enum
 {
+    USB_DIR_OUT,
+    USB_DIR_IN,
+} usb_dir_e;
+
+// typedef enum
+// {
+//     USB_PID_OUT      = 0x01,
+//     USB_PID_IN       = 0x09,
+//     USB_PID_SOF      = 0x05,
+//     USB_PID_SETUP    = 0x0D,
+
+//     USB_PID_DATA0    = 0x03,
+//     USB_PID_DATA1    = 0x0B,
+//     USB_PID_DATA2    = 0x07,
+//     USB_PID_MDATA    = 0x0F,
+
+//     USB_PID_ACK      = 0x02,
+//     USB_PID_NAK      = 0x0A,
+//     USB_PID_STALL    = 0x0E,
+//     USB_PID_NYET     = 0x06,
+
+//     USB_PID_PRE_ERR  = 0x0C,
+//     USB_PID_SPLIT    = 0x08,
+//     USB_PID_PING     = 0x04,
+//     USB_PID_RESERVED = 0x00,
+// } usb_pid_e;
+
+typedef enum
+{
+    XFER_TYPE_CTRL,
+    XFER_TYPE_ISOC,
+    XFER_TYPE_BULK,
+    XFER_TYPE_INTR,
+} xfer_type_e;
+
+typedef enum
+{
+    ENDP_RESP_NONE,
     ENDP_RESP_ACK,
     ENDP_RESP_NYET,
     ENDP_RESP_NAK,
@@ -91,13 +136,6 @@ typedef enum
     ENDP_TOG_DATA2,
     ENDP_TOG_MDATA,
 } endp_tog_e;
-
-typedef enum
-{
-    ENDP_TYPE_NORMAL,
-    ENDP_TYPE_ISO,
-    ENDP_TYPE_BURST,
-} endp_type_e;
 
 typedef enum
 {
@@ -115,6 +153,35 @@ typedef enum
 
 typedef enum
 {
+    USB_CLASS_PER_INTERFACE         = 0x00,
+    USB_CLASS_AUDIO                 = 0x01,
+    USB_CLASS_COMM                  = 0x02,
+    USB_CLASS_HID                   = 0x03,
+    USB_CLASS_PHYSICAL              = 0x05,
+    USB_CLASS_IMAGE                 = 0x06,
+    USB_CLASS_PRINTER               = 0x07,
+    USB_CLASS_MSC                   = 0x08,
+    USB_CLASS_HUB                   = 0x09,
+    USB_CLASS_CDC_DATA              = 0x0A,
+    USB_CLASS_SMART_CARD            = 0x0B,
+    USB_CLASS_CONTENT_SEC           = 0x0D,
+    USB_CLASS_VIDEO                 = 0x0E,
+    USB_CLASS_PERSONAL_HEALTHCARE   = 0x0F,
+    USB_CLASS_AUDIO_VIDEO           = 0x10,
+    USB_CLASS_BILLBOARD             = 0x11,
+    USB_CLASS_TYPE_C_BRIDGE         = 0x12,
+    USB_CLASS_BULK_DISPLAY          = 0x13,
+    USB_CLASS_MCTP_DEVICE           = 0x14,
+    USB_CLASS_I3C_DEVICE            = 0x3C,
+    USB_CLASS_DIAGNOSTIC_DEVICE     = 0xDC,
+    USB_CLASS_WIRELESS_CONTROLLER   = 0xE0,
+    USB_CLASS_MISC                  = 0xEF,
+    USB_CLASS_APP_SPEC              = 0xFE,
+    USB_CLASS_VENDOR_SPEC           = 0xFF,
+} usb_class_code_e;
+
+typedef enum
+{
     USB_REQ_CODE_GET_STATUS         = 0x00,
     USB_REQ_CODE_CLEAR_FEATURE      = 0x01,
     USB_REQ_CODE_SET_FEATURE        = 0x03,
@@ -122,7 +189,7 @@ typedef enum
     USB_REQ_CODE_GET_DESCRIPTOR     = 0x06,
     USB_REQ_CODE_SET_DESCRIPTOR     = 0x07,
     USB_REQ_CODE_GET_CONFIGURATION  = 0x08,
-    USB_REQ_CODE_SET_CONFIGURATION  = 0x09,
+    USB_REQ_CODE_SET_CONFIG         = 0x09,
     USB_REQ_CODE_GET_INTERFACE      = 0x0A,
     USB_REQ_CODE_SET_INTERFACE      = 0x0B,
     USB_REQ_CODE_SYNCH_FRAME        = 0x0C,
@@ -134,6 +201,16 @@ typedef enum
     USB_REQ_FEATURE_REMOTE_WAKEUP,
     USB_REQ_FEATURE_TEST_MODE,
 } usb_req_feature_e;
+
+typedef enum
+{
+    USB_REQ_TEST_SELECT_RESERVED,
+    USB_REQ_TEST_SELECT_J,
+    USB_REQ_TEST_SELECT_K,
+    USB_REQ_TEST_SELECT_SE0_NAK,
+    USB_REQ_TEST_SELECT_PACKET,
+    USB_REQ_TEST_SELECT_FORCE_ENABLE,
+} usb_req_test_select_e;
 
 typedef enum
 {
@@ -153,29 +230,31 @@ typedef enum
 
 typedef enum
 {
-    USB_DESC_DEVICE                             = 0x01,
-    USB_DESC_CONFIGURATION                      = 0x02,
-    USB_DESC_STRING                             = 0x03,
-    USB_DESC_INTERFACE                          = 0x04,
-    USB_DESC_ENDPOINT                           = 0x05,
-    USB_DESC_DEVICE_QUALIFIER                   = 0x06,
-    USB_DESC_OTHER_SPEED_CONFIG                 = 0x07,
-    USB_DESC_INTERFACE_POWER                    = 0x08,
-    USB_DESC_OTG                                = 0x09,
-    USB_DESC_DEBUG                              = 0x0A,
-    USB_DESC_INTERFACE_ASSOCIATION              = 0x0B,
+    USB_DESC_DEVICE                 = 0x01,
+    USB_DESC_CONFIGURATION          = 0x02,
+    USB_DESC_STRING                 = 0x03,
+    USB_DESC_INTERFACE              = 0x04,
+    USB_DESC_ENDPOINT               = 0x05,
+    USB_DESC_DEVICE_QUALIFIER       = 0x06,
+    USB_DESC_OTHER_SPEED_CONFIG     = 0x07,
+    USB_DESC_INTERFACE_POWER        = 0x08,
+    USB_DESC_OTG                    = 0x09,
+    USB_DESC_DEBUG                  = 0x0A,
+    USB_DESC_INTERFACE_ASSOCIATION  = 0x0B,
 
-    USB_DESC_BOS                                = 0x0F,
-    USB_DESC_DEVICE_CAPABILITY                  = 0x10,
+    USB_DESC_BOS                    = 0x0F,
+    USB_DESC_DEVICE_CAPABILITY      = 0x10,
 
-    USB_DESC_FUNCTIONAL                         = 0x21,
+    USB_DESC_FUNCTIONAL             = 0x21,
 
     // Class Specific Descriptor
-    USB_DESC_CS_DEVICE                          = 0x21,
-    USB_DESC_CS_CONFIGURATION                   = 0x22,
-    USB_DESC_CS_STRING                          = 0x23,
-    USB_DESC_CS_INTERFACE                       = 0x24,
-    USB_DESC_CS_ENDPOINT                        = 0x25,
+    USB_DESC_CS_DEVICE              = 0x21,
+    USB_DESC_CS_CONFIGURATION       = 0x22,
+    USB_DESC_CS_STRING              = 0x23,
+    USB_DESC_CS_INTERFACE           = 0x24,
+    USB_DESC_CS_ENDPOINT            = 0x25,
+
+    USB_DESC_HUB                    = 0x29,
 } usb_desc_type_e;
 
 /* @struct */
@@ -187,14 +266,14 @@ typedef struct
 {
     union
     {
+        uint8_t bmRequestType;
+
         struct
         {
             uint8_t recipient : 5;
             uint8_t type : 2;
             uint8_t direction : 1;
         } bmRequestType_bit;
-
-        uint8_t bmRequestType;
     };
 
     uint8_t bRequest;
@@ -234,8 +313,62 @@ typedef struct
     uint8_t bReserved;
 } desc_qua_t;
 
+typedef struct
+{
+    uint8_t bLength;
+    uint8_t bDescriptorType;
+    uint16_t wTotalLength;
+    uint8_t bNumInterfaces;
+    uint8_t bConfigurationValue;
+    uint8_t iConfiguration;
+    uint8_t bmAttributes;
+    uint8_t bMaxPower;
+} desc_config_t;
+
+typedef struct
+{
+    uint8_t bLength;
+    uint8_t bDescriptorType;
+    uint8_t bInterfaceNumber;
+    uint8_t bAlternateSetting;
+    uint8_t bNumEndpoints;
+    uint8_t bInterfaceClass;
+    uint8_t bInterfaceSubClass;
+    uint8_t bInterfaceProtocol;
+    uint8_t iInterface;
+} desc_interface_t;
+
+typedef struct
+{
+    uint8_t bLength;
+    uint8_t bDescriptorType;
+    uint8_t bEndpointAddress;
+    uint8_t bmAttributes;
+    uint16_t wMaxPacketSize;
+    uint8_t bInterval;
+} desc_endpoint_t;
+
 /* End single-byte alignment */
 #pragma pack()
+
+typedef struct
+{
+    union
+    {
+        uint32_t split_data;
+
+        struct
+        {
+            uint32_t hub_addr : 7;
+            uint32_t sc : 1;
+            uint32_t port : 7;
+            uint32_t s : 1;
+            uint32_t e : 1;
+            uint32_t et : 2;
+            uint32_t reserved : 13;
+        };
+    };
+} split_data_t;
 
 #ifdef __cplusplus
 }

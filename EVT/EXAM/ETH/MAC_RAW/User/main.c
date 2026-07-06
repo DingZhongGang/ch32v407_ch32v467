@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : main.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/12/01
+* Version            : V1.0.1
+* Date               : 2026/06/30
 * Description        : Main program body.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -112,7 +112,6 @@ int main(void)
     for(i = 0; i < 6; i++)
         printf("%x ", MACAddr[i]);
     printf("\n");
-    printf("%x %x\r\n", (uint32_t)&RCC->CTLR, RCC->CTLR);
     TIM2_Init();
     ETH_Init(MACAddr);
     /* change source MAC address */

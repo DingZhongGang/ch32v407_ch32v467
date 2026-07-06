@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : nand_flash.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2024/03/05
+* Version            : V1.0.1
+* Date               : 2026/07/01
 * Description        : This file contains the headers of the NANDFLASH.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -24,10 +24,10 @@ u32 ReadEccData[4];
  */
 u8 NAND_Init(void)
 {
-    FSMC_NANDInitTypeDef  FSMC_NANDInitStructure;
-    FSMC_NAND_PCCARDTimingInitTypeDef  ComSpaceTiming;
-    FSMC_NAND_PCCARDTimingInitTypeDef  AttSpaceTiming;
-    GPIO_InitTypeDef  GPIO_InitStructure;
+    FSMC_NANDInitTypeDef  FSMC_NANDInitStructure = {0};
+    FSMC_NAND_PCCARDTimingInitTypeDef  ComSpaceTiming = {0};
+    FSMC_NAND_PCCARDTimingInitTypeDef  AttSpaceTiming = {0};
+    GPIO_InitTypeDef  GPIO_InitStructure = {0};
 
     RCC_PB2PeriphClockCmd(RCC_PB2Periph_GPIOD | RCC_PB2Periph_GPIOE,ENABLE);
     RCC_HBPeriphClockCmd(RCC_HBPeriph_FSMC,ENABLE);

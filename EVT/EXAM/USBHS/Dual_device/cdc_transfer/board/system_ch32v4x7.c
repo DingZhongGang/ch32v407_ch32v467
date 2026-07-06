@@ -1,13 +1,13 @@
 /********************************** (C) COPYRIGHT *******************************
 * File Name          : system_ch32v4x7.c
 * Author             : WCH
-* Version            : V1.0.0
-* Date               : 2025/12/01
+* Version            : V1.2
+* Date               : 2026/05/26
 * Description        : CH32V4x7 Device Peripheral Access Layer System Source File.
 *                      For HSE = 25Mhz
 *********************************************************************************
-* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* Attention: This software (modified or not) and binary are used for 
+* Copyright (c) 2026 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #include "ch32v4x7.h" 
@@ -28,7 +28,7 @@
 // #define SYSCLK_350MHz_HCLK_175MHz_HSI  350000000
 // #define SYSCLK_400MHz_HCLK_200MHz_HSI  400000000  
 
-/*Only suitable for commercial applications, with a temperature not exceeding 70 °C and good heat dissipation*/
+/*Only suitable for commercial applications, with a temperature not exceeding 70 �� and good heat dissipation*/
 /* 
 // #define SYSCLK_480MHz_HCLK_240MHz_HSE    480000000
 // #define SYSCLK_480MHz_HCLK_240MHz_HSI    480000000 
@@ -225,7 +225,7 @@ void SystemCoreClockUpdate (void)
  */
 static void SetSysClock(void)
 {
-    GPIO_IPD_Unused();
+  //GPIO_IPD_Unused();
 #ifdef SYSCLK_HCLK_HSE
     SetSYSCLK_HCLK_HSE();
 #elif defined SYSCLK_120MHz_HCLK_60MHz_HSE
@@ -826,7 +826,7 @@ static void SetSYSCLK_120MHz_HCLK_60MHz_HSI(void)
  */
 static void SetSYSCLK_240MHz_HCLK_120MHz_HSI(void)
 {
-    __IO uint32_t FLASH_Temp = 0;
+    __IO uint32_t  = 0;
 
     /* HCLK = SYSCLK / 2 */
     RCC->CFGR0 |= (uint32_t)RCC_HPRE_DIV2;
@@ -1089,7 +1089,7 @@ static void SetSYSCLK_HCLK_HSI(void)
     /* Select HSI as system clock source */
     RCC->CFGR0 &= (uint32_t)((uint32_t)~(RCC_SW));
     RCC->CFGR0 |= (uint32_t)RCC_SW_HSI;
-    /* Wait till HSI is used as system clock source */
+    /* Wait till PLL is used as system clock source */
     while ((RCC->CFGR0 & (uint32_t)RCC_SWS) != (uint32_t)0x00)
     {
     }
